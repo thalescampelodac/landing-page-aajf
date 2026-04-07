@@ -23,10 +23,16 @@ html {
 body {
   margin: 0;
   background:
-    radial-gradient(circle at top, rgba(215, 182, 100, 0.18), transparent 32%),
-    linear-gradient(180deg, #f8f2e7 0%, #f6efe2 26%, #fcfaf6 100%);
+    radial-gradient(circle at top, rgba(201, 178, 96, 0.22), transparent 30%),
+    linear-gradient(180deg, #f3efe7 0%, #f6f0e5 30%, #fcfaf6 100%);
   color: #1f2a1f;
   font-family: "Segoe UI", "Trebuchet MS", sans-serif;
+}
+
+input,
+textarea,
+button {
+  font: inherit;
 }
 
 a {
@@ -45,9 +51,23 @@ a {
 
 .section-card {
   border: 1px solid rgba(46, 70, 52, 0.08);
-  background: rgba(255, 252, 246, 0.78);
+  background: rgba(255, 252, 246, 0.84);
   backdrop-filter: blur(16px);
   box-shadow: 0 24px 70px rgba(40, 51, 37, 0.09);
+}
+
+.hero-card {
+  border: 1px solid rgba(46, 70, 52, 0.09);
+  background:
+    linear-gradient(145deg, rgba(255, 251, 243, 0.96), rgba(248, 239, 224, 0.9)),
+    linear-gradient(90deg, rgba(47, 104, 67, 0.04), rgba(0, 0, 0, 0), rgba(165, 32, 35, 0.04));
+  box-shadow: 0 28px 75px rgba(40, 51, 37, 0.1);
+}
+
+.contact-card {
+  background:
+    radial-gradient(circle at top left, rgba(242, 206, 122, 0.16), transparent 30%),
+    linear-gradient(180deg, #8b1f22 0%, #6f171a 100%);
 }
 
 .ornament {
@@ -62,6 +82,121 @@ a {
   width: 4rem;
   height: 2px;
   background: linear-gradient(90deg, #a0141e, #ddb35f);
+}
+
+.nav-pill {
+  border: 1px solid rgba(35, 64, 44, 0.12);
+  border-radius: 999px;
+  background: rgba(255, 252, 246, 0.9);
+  padding: 0.65rem 1rem;
+  transition:
+    transform 180ms ease,
+    border-color 180ms ease,
+    background-color 180ms ease;
+}
+
+.nav-pill:hover {
+  transform: translateY(-1px);
+  border-color: rgba(139, 31, 34, 0.24);
+  background: rgba(255, 247, 237, 0.95);
+}
+
+.flag-pill {
+  border-width: 1px;
+  border-style: solid;
+  border-radius: 999px;
+  padding: 0.45rem 0.8rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+
+.primary-button,
+.secondary-button {
+  border-radius: 999px;
+  padding: 0.9rem 1.5rem;
+  text-align: center;
+  font-size: 0.9rem;
+  font-weight: 700;
+  transition:
+    transform 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.primary-button {
+  background: #163321;
+  color: #fff9f0;
+  box-shadow: 0 16px 35px rgba(22, 51, 33, 0.18);
+}
+
+.primary-button:hover,
+.secondary-button:hover {
+  transform: translateY(-2px);
+}
+
+.secondary-button {
+  border: 1px solid rgba(22, 51, 33, 0.14);
+  background: rgba(255, 251, 243, 0.88);
+  color: #163321;
+}
+
+.metric-card {
+  border: 1px solid rgba(36, 64, 44, 0.1);
+  border-radius: 1.35rem;
+  background: rgba(255, 251, 243, 0.75);
+  padding: 1rem;
+}
+
+.metric-label {
+  margin: 0;
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: #8b1f22;
+}
+
+.metric-value {
+  margin: 0.45rem 0 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #163321;
+}
+
+.form-field {
+  display: grid;
+  gap: 0.55rem;
+}
+
+.form-field span {
+  font-size: 0.85rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  color: #163321;
+}
+
+.form-field input,
+.form-field textarea {
+  width: 100%;
+  border: 1px solid rgba(36, 64, 44, 0.12);
+  border-radius: 1rem;
+  background: rgba(255, 251, 243, 0.88);
+  padding: 0.95rem 1rem;
+  color: #233127;
+  outline: none;
+  transition:
+    border-color 180ms ease,
+    box-shadow 180ms ease,
+    background-color 180ms ease;
+}
+
+.form-field input:focus,
+.form-field textarea:focus {
+  border-color: rgba(139, 31, 34, 0.38);
+  box-shadow: 0 0 0 4px rgba(139, 31, 34, 0.08);
+  background: #fffdf8;
 }
 
 @media (max-width: 640px) {

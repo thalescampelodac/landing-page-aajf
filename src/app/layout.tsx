@@ -1,10 +1,12 @@
 import type { Metadata } from "next";
+import { SiteFooter } from "@/components/site-footer";
+import { SiteHeader } from "@/components/site-header";
 import "./globals.css";
 
 export const metadata: Metadata = {
-  title: "Associacao Alema de Juiz de Fora",
+  title: "Associação Alemã de Juiz de Fora",
   description:
-    "Nova landing page institucional da Associacao Cultural e Recreativa Brasil-Alemanha, em Juiz de Fora/MG.",
+    "Landing page institucional da Associação Cultural e Recreativa Brasil-Alemanha, em Juiz de Fora/MG.",
 };
 
 export default function RootLayout({
@@ -14,7 +16,11 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="pt-BR" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">{children}</body>
+      <body className="min-h-full flex flex-col">
+        <SiteHeader />
+        {children}
+        <SiteFooter />
+      </body>
     </html>
   );
 }
