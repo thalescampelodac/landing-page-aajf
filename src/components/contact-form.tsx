@@ -1,7 +1,7 @@
 "use client";
 
 import { FormEvent, useState } from "react";
-import { siteConfig } from "@/lib/site-content";
+import { buildContactMailto } from "@/lib/contact-form";
 
 export function ContactForm() {
   const [name, setName] = useState("");
@@ -12,17 +12,9 @@ export function ContactForm() {
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    const mailto = new URL(`mailto:${siteConfig.email}`);
-    mailto.searchParams.set(
-      "subject",
-      subject || `Contato pelo site - ${siteConfig.name}`,
+    window.location.assign(
+      buildContactMailto({ name, email, subject, message }),
     );
-    mailto.searchParams.set(
-      "body",
-      [`Nome: ${name}`, `Email: ${email}`, "", "Mensagem:", message].join("\n"),
-    );
-
-    window.location.href = mailto.toString();
   };
 
   return (

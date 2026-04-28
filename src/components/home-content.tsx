@@ -1,272 +1,216 @@
-import Image from "next/image";
 import Link from "next/link";
+import { AccessAreaCard } from "@/components/access-area-card";
+import { FeatureCard } from "@/components/feature-card";
+import { Hero } from "@/components/hero";
+import { PublicationCard } from "@/components/publication-card";
+import { SectionTitle } from "@/components/section-title";
+import { TestimonialCard } from "@/components/testimonial-card";
 import {
-  heroBadges,
+  aboutContent,
+  accessAreas,
+  essenceItems,
   posts,
+  schmetterlingContent,
   siteConfig,
   testimonials,
-  values,
 } from "@/lib/site-content";
 
 export function HomeContent() {
-  const featuredPost = posts[0];
-  const secondaryPosts = posts.slice(1);
+  const [featuredPost, ...otherPosts] = posts;
 
   return (
-    <main className="flex-1 pb-16 text-[#233127]">
-      <section className="section-shell mt-8">
-        <div className="hero-card overflow-hidden rounded-[2rem]">
-          <div className="grid gap-10 px-6 pb-8 pt-8 sm:px-8 sm:pb-10 lg:grid-cols-[1.05fr_0.95fr] lg:px-10 lg:pb-12">
-            <div className="pt-2">
-              <div className="flex flex-wrap gap-3">
-                {heroBadges.map((badge, index) => (
-                  <span
-                    key={badge}
-                    className={
-                      index === 0
-                        ? "flag-pill border-[#2f6843]/15 bg-[#eef6ef] text-[#2f6843]"
-                        : index === 1
-                          ? "flag-pill border-[#b08f39]/20 bg-[#fff7dd] text-[#896813]"
-                          : "flag-pill border-[#9e2020]/15 bg-[#fff0ef] text-[#8b1f22]"
-                    }
-                  >
-                    {badge}
-                  </span>
-                ))}
-              </div>
+    <main className="flex-1 pb-20">
+      <Hero />
 
-              <p className="mt-6 text-sm font-semibold uppercase tracking-[0.32em] text-[#8b1f22]">
-                Seja bem-vindo
-              </p>
-              <h1 className="mt-4 max-w-3xl font-heading text-5xl leading-[0.94] text-[#163321] sm:text-6xl lg:text-7xl">
-                Celebrando a cultura alemã com dança, história e união.
-              </h1>
-              <p className="mt-6 max-w-2xl text-base leading-8 text-[#425244] sm:text-lg">
-                A {siteConfig.name} tem como missão preservar e difundir as tradições
-                germânicas por meio da cultura, da dança e da confraternização,
-                aproximando gerações e admiradores dessa herança.
-              </p>
+      <section id="essencia" className="section-shell section-spacing">
+        <SectionTitle
+          eyebrow="Nossa essência"
+          title="Cultura, tradição e convivência apresentadas com leveza e orgulho."
+          description="A nova landing destaca os pilares que tornam a associação um espaço de memória, comunidade e celebração da cultura alemã."
+          align="center"
+        />
 
-              <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-                <Link href="/publicacoes" className="primary-button">
-                  Ver publicações
-                </Link>
-                <Link href="/quem-somos" className="secondary-button">
-                  Conhecer a associação
-                </Link>
-              </div>
-
-              <div className="mt-10 grid gap-4 sm:grid-cols-3">
-                <div className="metric-card">
-                  <p className="metric-label">Destaque cultural</p>
-                  <p className="metric-value">Grupo Schmetterling</p>
-                </div>
-                <div className="metric-card">
-                  <p className="metric-label">Atuação</p>
-                  <p className="metric-value">Juiz de Fora/MG</p>
-                </div>
-                <div className="metric-card">
-                  <p className="metric-label">Essência</p>
-                  <p className="metric-value">Tradição e convivência</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="relative">
-              <div className="absolute inset-0 -z-10 translate-x-4 translate-y-4 rounded-[2rem] bg-[linear-gradient(135deg,rgba(22,51,33,0.10),rgba(221,179,95,0.16),rgba(139,31,34,0.12))]" />
-              <div className="overflow-hidden rounded-[2rem] border border-white/65 bg-[#fffaf4] shadow-2xl shadow-[#163321]/10">
-                <div className="relative aspect-[4/3]">
-                  <Image
-                    src={featuredPost.image!}
-                    alt="Grupo Schmetterling em apresentação cultural"
-                    fill
-                    className="object-cover"
-                    priority
-                  />
-                  <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(16,27,21,0)_25%,rgba(16,27,21,0.72)_100%)]" />
-                  <div className="absolute bottom-0 left-0 right-0 p-6 text-[#fff8ef]">
-                    <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#f0cb78]">
-                      Publicação em destaque
-                    </p>
-                    <h2 className="mt-3 font-heading text-3xl leading-tight">
-                      {featuredPost.title}
-                    </h2>
-                    <p className="mt-3 max-w-lg text-sm leading-7 text-[#f5ead7]">
-                      {featuredPost.excerpt}
-                    </p>
-                  </div>
-                </div>
-              </div>
-            </div>
-          </div>
+        <div className="mt-10 grid gap-5 md:grid-cols-2 xl:grid-cols-3">
+          {essenceItems.map((item) => (
+            <FeatureCard
+              key={item.title}
+              title={item.title}
+              description={item.description}
+            />
+          ))}
         </div>
       </section>
 
-      <section className="section-shell mt-8">
-        <div className="grid gap-6 lg:grid-cols-[0.95fr_1.05fr]">
-          <article className="section-card rounded-[2rem] p-8 sm:p-10">
-            <p className="ornament text-sm font-semibold uppercase tracking-[0.35em] text-[#8b1f22]">
-              Quem Somos
-            </p>
-            <h2 className="mt-8 font-heading text-4xl text-[#163321] sm:text-5xl">
-              Uma associação dedicada a manter viva a herança alemã.
-            </h2>
-            <p className="mt-6 text-base leading-8 text-[#425244]">
-              A {siteConfig.name}, oficialmente {siteConfig.legalName}, preserva e
-              difunde as tradições germânicas por meio da cultura, da dança e da
-              confraternização. Nosso compromisso é fortalecer a união entre
-              descendentes e admiradores da cultura alemã.
-            </p>
-            <p className="mt-4 text-base leading-8 text-[#425244]">
-              Um dos grandes destaques da associação é o Grupo de Danças Folclóricas
-              Schmetterling, que encanta o público com apresentações marcadas por
-              alegria, autenticidade e respeito às tradições.
-            </p>
-            <Link href="/quem-somos" className="secondary-button mt-8 inline-flex">
-              Saber mais
+      <section id="quem-somos" className="section-shell section-spacing">
+        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
+          <article className="soft-card rounded-[2rem] p-7 sm:p-9 lg:p-10">
+            <SectionTitle
+              eyebrow={aboutContent.eyebrow}
+              title={aboutContent.title}
+            />
+
+            <div className="mt-6 grid gap-4 text-base leading-8 text-[var(--color-muted)]">
+              {aboutContent.paragraphs.map((paragraph) => (
+                <p key={paragraph}>{paragraph}</p>
+              ))}
+            </div>
+
+            <Link className="primary-button mt-8 inline-flex" href="/quem-somos">
+              Conhecer a história da associação
             </Link>
           </article>
 
-          <div className="grid gap-6">
-            {values.map((item) => (
-              <article
-                key={item.title}
-                className="section-card rounded-[1.75rem] p-6 sm:p-8"
-              >
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#b08f39]">
-                  Pilar
-                </p>
-                <h3 className="mt-3 font-heading text-3xl text-[#163321]">
-                  {item.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#425244]">{item.text}</p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section-shell mt-8">
-        <div className="section-card rounded-[2rem] p-8 sm:p-10">
-          <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
-            <div>
-              <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#b08f39]">
-                Publicações
-              </p>
-              <h2 className="mt-3 font-heading text-4xl text-[#163321] sm:text-5xl">
-                Conteúdo institucional com mais presença visual.
-              </h2>
-            </div>
-            <Link href="/publicacoes" className="secondary-button">
-              Ver todas
-            </Link>
-          </div>
-
-          <div className="mt-8 grid gap-5 lg:grid-cols-[1.2fr_0.8fr_0.8fr]">
-            <article className="overflow-hidden rounded-[1.8rem] border border-[#24402c]/10 bg-[#fffdf8]">
-              <div className="relative aspect-[16/10]">
-                <Image
-                  src={featuredPost.image!}
-                  alt="Integrantes do Grupo Schmetterling"
-                  fill
-                  className="object-cover"
-                />
-              </div>
-              <div className="p-6 sm:p-7">
-                <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#8b1f22]">
-                  Em destaque
-                </p>
-                <h3 className="mt-3 font-heading text-3xl leading-tight text-[#163321]">
-                  {featuredPost.title}
-                </h3>
-                <p className="mt-3 text-sm leading-7 text-[#425244]">
-                  {featuredPost.excerpt}
-                </p>
-                <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[#7d8b7d]">
-                  {featuredPost.date}
-                </p>
-              </div>
-            </article>
-
-            {secondaryPosts.map((post) => (
-              <article
-                key={post.slug}
-                className="flex flex-col justify-between rounded-[1.8rem] border border-[#24402c]/10 bg-[linear-gradient(180deg,#fffdf8_0%,#f8f0e6_100%)] p-6 sm:p-7"
-              >
-                <div>
-                  <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[#8b1f22]">
-                    Publicação
-                  </p>
-                  <h3 className="mt-3 font-heading text-3xl leading-tight text-[#163321]">
-                    {post.title}
-                  </h3>
-                  <p className="mt-3 text-sm leading-7 text-[#425244]">
-                    {post.excerpt}
+          <article className="highlight-card rounded-[2rem] p-7 text-[var(--color-paper)] sm:p-9 lg:p-10">
+            <p className="text-xs font-semibold uppercase tracking-[0.3em] text-[var(--color-gold-strong)]">
+              O que nos move
+            </p>
+            <div className="mt-6 grid gap-4">
+              {aboutContent.pillars.map((pillar) => (
+                <div
+                  key={pillar}
+                  className="rounded-[1.4rem] border border-white/12 bg-white/6 px-5 py-4"
+                >
+                  <p className="text-sm leading-7 text-[rgba(255,247,236,0.92)]">
+                    {pillar}
                   </p>
                 </div>
-                <p className="mt-6 text-xs font-semibold uppercase tracking-[0.24em] text-[#7d8b7d]">
-                  {post.date}
-                </p>
-              </article>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      <section className="section-shell mt-8">
-        <div className="grid gap-6 lg:grid-cols-[1.05fr_0.95fr]">
-          <article className="section-card rounded-[2rem] p-8 sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#8b1f22]">
-              Depoimentos
-            </p>
-            <h2 className="mt-3 font-heading text-4xl text-[#163321] sm:text-5xl">
-              Experiências que reforçam pertencimento.
-            </h2>
-            <div className="mt-8 grid gap-4">
-              {testimonials.map((item) => (
-                <blockquote
-                  key={item.name}
-                  className="rounded-[1.5rem] border border-[#284531]/10 bg-[#fffdf8] p-5"
-                >
-                  <p className="text-sm leading-7 text-[#425244]">"{item.quote}"</p>
-                  <footer className="mt-3 text-sm font-semibold text-[#163321]">
-                    {item.name}
-                  </footer>
-                </blockquote>
               ))}
             </div>
           </article>
+        </div>
+      </section>
 
-          <article className="contact-card rounded-[2rem] p-8 text-[#fff7ef] shadow-2xl shadow-[#8b1f22]/12 sm:p-10">
-            <p className="text-sm font-semibold uppercase tracking-[0.35em] text-[#f2ce7a]">
-              Contato
-            </p>
-            <h2 className="mt-3 font-heading text-4xl sm:text-5xl">
-              Presença cultural, acolhimento e diálogo.
-            </h2>
-            <p className="mt-5 text-sm leading-7 text-[#f8eadc]">
-              A nova estrutura já integra os canais oficiais da associação e está
-              pronta para crescer com novas páginas, galeria e conteúdos futuros.
-            </p>
+      <section id="schmetterling" className="section-shell section-spacing">
+        <div className="soft-card grid gap-8 rounded-[2rem] p-7 sm:p-9 lg:grid-cols-[0.95fr_1.05fr] lg:p-10">
+          <div>
+            <SectionTitle
+              eyebrow={schmetterlingContent.eyebrow}
+              title={schmetterlingContent.title}
+              description={schmetterlingContent.description}
+            />
+          </div>
 
-            <div className="mt-8 space-y-4 rounded-[1.5rem] border border-white/12 bg-white/8 p-5 text-sm leading-7 text-[#fff5eb]">
-              <a href={siteConfig.phoneHref} target="_blank" rel="noreferrer">
-                {siteConfig.phone}
-              </a>
-              <a href={`mailto:${siteConfig.email}`}>{siteConfig.email}</a>
-              <p>{siteConfig.address}</p>
-              <a href={siteConfig.facebook} target="_blank" rel="noreferrer">
-                Facebook oficial
-              </a>
-              <a href={siteConfig.instagram} target="_blank" rel="noreferrer">
-                Instagram oficial
-              </a>
+          <div className="grid gap-4">
+            {schmetterlingContent.points.map((point) => (
+              <article
+                key={point}
+                className="rounded-[1.5rem] border border-[rgba(22,45,36,0.08)] bg-[rgba(255,250,244,0.85)] px-5 py-5"
+              >
+                <p className="text-sm leading-7 text-[var(--color-muted)]">{point}</p>
+              </article>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section id="acessos" className="section-shell section-spacing">
+        <SectionTitle
+          eyebrow="Áreas de acesso"
+          title="Entradas preparadas para associados, gestão interna e apoiadores."
+          description="Os acessos já deixam a plataforma pronta para futuras evoluções com autenticação, permissão por perfil e gestão de conteúdo."
+        />
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-3">
+          {accessAreas.map((area) => (
+            <AccessAreaCard
+              key={area.href}
+              title={area.title}
+              description={area.description}
+              href={area.href}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section id="publicacoes" className="section-shell section-spacing">
+        <div className="flex flex-col gap-5 sm:flex-row sm:items-end sm:justify-between">
+          <SectionTitle
+            eyebrow="Publicações"
+            title="Conteúdos institucionais com cara de revista cultural."
+            description="A home passa a tratar as publicações como destaque editorial, com leitura mais arejada e mais espaço para o conteúdo crescer."
+          />
+          <Link className="secondary-button w-full sm:w-auto" href="/publicacoes">
+            Ver todas
+          </Link>
+        </div>
+
+        <div className="mt-10 grid gap-5 lg:grid-cols-4">
+          <PublicationCard
+            title={featuredPost.title}
+            excerpt={featuredPost.excerpt}
+            date={featuredPost.date}
+            image={featuredPost.image}
+            featured
+          />
+          {otherPosts.map((post) => (
+            <PublicationCard
+              key={post.slug}
+              title={post.title}
+              excerpt={post.excerpt}
+              date={post.date}
+              image={post.image}
+            />
+          ))}
+        </div>
+      </section>
+
+      <section id="comunidade" className="section-shell section-spacing">
+        <div className="grid gap-6 lg:grid-cols-[0.9fr_1.1fr]">
+          <article className="soft-card rounded-[2rem] p-7 sm:p-9 lg:p-10">
+            <SectionTitle
+              eyebrow="Depoimentos"
+              title="Vínculos reais fortalecem a vida cultural da associação."
+              description="Os relatos ajudam a comunicar pertencimento, acolhimento e a experiência de viver essa herança de forma ativa."
+            />
+          </article>
+
+          <div className="grid gap-5">
+            {testimonials.map((testimonial) => (
+              <TestimonialCard
+                key={testimonial.name}
+                name={testimonial.name}
+                quote={testimonial.quote}
+              />
+            ))}
+          </div>
+        </div>
+      </section>
+
+      <section className="section-shell section-spacing">
+        <div className="highlight-card rounded-[2.1rem] px-7 py-8 text-[var(--color-paper)] sm:px-9 sm:py-10 lg:px-12">
+          <div className="grid gap-8 lg:grid-cols-[1.1fr_0.9fr] lg:items-center">
+            <div>
+              <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--color-gold-strong)]">
+                Faça parte dessa história
+              </p>
+              <h2 className="mt-4 font-heading text-4xl sm:text-5xl">
+                Um convite para viver cultura, amizade e tradição em comunidade.
+              </h2>
+              <p className="mt-5 max-w-2xl text-sm leading-8 text-[rgba(255,247,236,0.88)]">
+                Entre em contato, acompanhe as publicações e aproxime-se da
+                associação para participar de encontros, eventos e novos capítulos
+                dessa história cultural em Juiz de Fora.
+              </p>
             </div>
 
-            <Link href="/contato" className="primary-button mt-6 inline-flex">
-              Ir para contato
-            </Link>
-          </article>
+            <div id="contato" className="grid gap-4 rounded-[1.7rem] border border-white/12 bg-white/6 p-6">
+              <a href={siteConfig.phoneHref} target="_blank" rel="noreferrer" className="contact-link">
+                WhatsApp: {siteConfig.phone}
+              </a>
+              <a href={`mailto:${siteConfig.email}`} className="contact-link">
+                Email: {siteConfig.email}
+              </a>
+              <p className="contact-link">{siteConfig.address}</p>
+              <div className="flex flex-col gap-3 sm:flex-row">
+                <Link className="ghost-button" href="/contato">
+                  Ir para contato
+                </Link>
+                <Link className="ghost-button" href="/apoiador">
+                  Quero apoiar
+                </Link>
+              </div>
+            </div>
+          </div>
         </div>
       </section>
     </main>

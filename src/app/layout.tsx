@@ -1,7 +1,19 @@
 import type { Metadata } from "next";
-import { SiteFooter } from "@/components/site-footer";
-import { SiteHeader } from "@/components/site-header";
+import { Cormorant_Garamond, Manrope } from "next/font/google";
+import { Footer } from "@/components/site-footer";
+import { Header } from "@/components/site-header";
 import "./globals.css";
+
+const bodyFont = Manrope({
+  subsets: ["latin"],
+  variable: "--font-body",
+});
+
+const displayFont = Cormorant_Garamond({
+  subsets: ["latin"],
+  variable: "--font-display",
+  weight: ["400", "500", "600", "700"],
+});
 
 export const metadata: Metadata = {
   title: "Associação Alemã de Juiz de Fora",
@@ -15,11 +27,14 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="pt-BR" className="h-full antialiased">
-      <body className="min-h-full flex flex-col">
-        <SiteHeader />
+    <html
+      lang="pt-BR"
+      className={`${bodyFont.variable} ${displayFont.variable} h-full antialiased`}
+    >
+      <body className="flex min-h-full flex-col">
+        <Header />
         {children}
-        <SiteFooter />
+        <Footer />
       </body>
     </html>
   );
