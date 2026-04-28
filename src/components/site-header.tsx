@@ -32,13 +32,13 @@ export function Header() {
 
             <div className="flex flex-wrap gap-3">
               <Link className="secondary-button" href="/associado">
-                Área do Associado
+                ASSOCIADO
               </Link>
               <Link className="secondary-button" href="/admin">
-                Área Administrativa
+                ADMINISTRAÇÃO
               </Link>
               <Link className="primary-button" href="/apoiador">
-                Área do Apoiador
+                APOIADOR
               </Link>
             </div>
           </div>
