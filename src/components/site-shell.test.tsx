@@ -11,7 +11,7 @@ describe("site shell components", () => {
       screen.getByRole("img", { name: `Logo da ${siteConfig.name}` }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("link", { name: /Área do Associado/i }),
+      screen.getByRole("link", { name: "ASSOCIADO" }),
     ).toHaveAttribute("href", "/associado");
 
     for (const item of navItems) {
