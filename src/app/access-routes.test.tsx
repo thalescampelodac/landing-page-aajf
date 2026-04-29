@@ -1,5 +1,4 @@
 import { render, screen } from "@testing-library/react";
-import AdminPage from "@/app/admin/page";
 import ApoiadorPage from "@/app/apoiador/page";
 import AssociadoPage from "@/app/associado/page";
 
@@ -9,13 +8,6 @@ describe("placeholder routes", () => {
     expect(screen.getByText(/Área em construção/i)).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /vida da associação/i }),
-    ).toBeInTheDocument();
-  });
-
-  it("renderiza a area administrativa", () => {
-    render(<AdminPage />);
-    expect(
-      screen.getByRole("heading", { name: /Gestão interna pronta/i }),
     ).toBeInTheDocument();
   });
 

@@ -21,6 +21,7 @@ export async function signInWithPassword(
 
   const email = String(formData.get("email") || "");
   const password = String(formData.get("password") || "");
+  const next = getSafeNextPath(String(formData.get("next") || ""));
 
   const supabase = await createClient();
   const { error } = await supabase.auth.signInWithPassword({
@@ -32,19 +33,20 @@ export async function signInWithPassword(
     return { error: error.message };
   }
 
-  redirect("/");
+  redirect(next);
 }
 
-export async function signInWithGoogle() {
+export async function signInWithGoogle(formData: FormData) {
   if (!isSupabaseConfigured()) {
     redirect("/entrar?error=supabase-not-configured");
   }
 
+  const next = getSafeNextPath(String(formData.get("next") || ""));
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${getSiteUrl()}/auth/callback`,
+      redirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 
@@ -62,4 +64,12 @@ export async function signOut() {
   }
 
   redirect("/entrar");
+}
+
+function getSafeNextPath(next: string) {
+  if (!next.startsWith("/") || next.startsWith("//")) {
+    return "/";
+  }
+
+  return next;
 }

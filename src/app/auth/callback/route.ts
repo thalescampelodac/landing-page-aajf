@@ -5,7 +5,7 @@ import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 export async function GET(request: NextRequest) {
   const requestUrl = new URL(request.url);
   const code = requestUrl.searchParams.get("code");
-  const next = requestUrl.searchParams.get("next") || "/";
+  const next = getSafeNextPath(requestUrl.searchParams.get("next") || "");
 
   if (!isSupabaseConfigured()) {
     return NextResponse.redirect(
@@ -19,4 +19,12 @@ export async function GET(request: NextRequest) {
   }
 
   return NextResponse.redirect(new URL(next, getSiteUrl()));
+}
+
+function getSafeNextPath(next: string) {
+  if (!next.startsWith("/") || next.startsWith("//")) {
+    return "/";
+  }
+
+  return next;
 }

@@ -15,12 +15,33 @@ NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
+## Onde encontrar as variáveis
+
+No dashboard do Supabase:
+
+1. Abrir o projeto usado para o app.
+2. Abrir o botão **Connect** e copiar **Project URL** para `NEXT_PUBLIC_SUPABASE_URL`.
+3. Ir em **Project Settings**.
+4. Abrir **API Keys**.
+5. Copiar uma **Publishable key** para `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+
+Não use `secret` nem `service_role` em variáveis `NEXT_PUBLIC_`, porque elas ficam disponíveis no navegador.
+
+Para desenvolvimento local, mantenha:
+
+```env
+NEXT_PUBLIC_SITE_URL=http://localhost:3000
+```
+
+Em Preview/Produção na Vercel, defina `NEXT_PUBLIC_SITE_URL` com a URL pública do ambiente quando ela estiver disponível.
+
 ## Aplicar migration
 
 Arquivo:
 
 ```text
 supabase/migrations/20260429150747_initial_access_schema.sql
+supabase/migrations/20260429160126_admin_bootstrap.sql
 ```
 
 Opção pelo dashboard:
@@ -54,11 +75,22 @@ http://localhost:3000/auth/callback
 https://SEU_DOMINIO/auth/callback
 ```
 
+## Expor schema para o app
+
+Para o app consultar permissões usando RLS:
+
+1. Abrir **Project Settings**.
+2. Abrir **Data API**.
+3. Em **Exposed schemas**, adicionar `aajf`.
+4. Salvar as alterações.
+
+O schema continua protegido por RLS. A exposição apenas permite que o Supabase client consulte as tabelas autorizadas pelas policies.
+
 ## Observações
 
 - A migration cria a estrutura de autorização, mas não cria o primeiro administrador.
 - A migration usa o schema `aajf` para isolar este app dentro de um projeto Supabase existente.
-- O primeiro administrador será tratado na issue [#4 Implementar bootstrap de administradores](https://github.com/thalescampelodac/landing-page-aajf/issues/4).
+- O primeiro administrador é tratado pelo fluxo em [Bootstrap de administradores](./admin-bootstrap.md).
 - A criação manual do projeto Supabase continua fora do escopo desta issue.
 
 ## Remover schema temporário
