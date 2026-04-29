@@ -1,0 +1,94 @@
+"use client";
+
+import { useActionState } from "react";
+import {
+  SignInState,
+  signInWithGoogle,
+  signInWithPassword,
+} from "@/app/entrar/actions";
+
+const initialState: SignInState = {};
+
+type AuthFormProps = {
+  isConfigured: boolean;
+  searchError?: string;
+};
+
+export function AuthForm({ isConfigured, searchError }: AuthFormProps) {
+  const [state, formAction, isPending] = useActionState(
+    signInWithPassword,
+    initialState,
+  );
+
+  const error = state.error || getSearchErrorMessage(searchError);
+
+  return (
+    <div className="grid gap-5">
+      {!isConfigured ? (
+        <div className="rounded-[1rem] border border-[rgba(154,31,43,0.18)] bg-[rgba(154,31,43,0.07)] p-4 text-sm leading-7 text-[var(--color-red-deep)]">
+          Supabase ainda não está configurado. Defina
+          `NEXT_PUBLIC_SUPABASE_URL` e `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`
+          para habilitar o acesso.
+        </div>
+      ) : null}
+
+      {error ? (
+        <div className="rounded-[1rem] border border-[rgba(154,31,43,0.18)] bg-[rgba(154,31,43,0.07)] p-4 text-sm leading-7 text-[var(--color-red-deep)]">
+          {error}
+        </div>
+      ) : null}
+
+      <form action={signInWithGoogle}>
+        <button className="secondary-button w-full" disabled={!isConfigured} type="submit">
+          Entrar com Google
+        </button>
+      </form>
+
+      <form action={formAction} className="grid gap-4">
+        <label className="form-field">
+          <span>Email</span>
+          <input
+            autoComplete="email"
+            disabled={!isConfigured || isPending}
+            name="email"
+            placeholder="voce@email.com"
+            required
+            type="email"
+          />
+        </label>
+
+        <label className="form-field">
+          <span>Senha</span>
+          <input
+            autoComplete="current-password"
+            disabled={!isConfigured || isPending}
+            name="password"
+            placeholder="Sua senha"
+            required
+            type="password"
+          />
+        </label>
+
+        <button
+          className="primary-button w-full"
+          disabled={!isConfigured || isPending}
+          type="submit"
+        >
+          {isPending ? "Entrando..." : "Entrar com email e senha"}
+        </button>
+      </form>
+    </div>
+  );
+}
+
+function getSearchErrorMessage(error?: string) {
+  if (error === "supabase-not-configured") {
+    return "Supabase ainda não está configurado para autenticação.";
+  }
+
+  if (error === "google-sign-in-failed") {
+    return "Não foi possível iniciar o acesso com Google.";
+  }
+
+  return undefined;
+}
