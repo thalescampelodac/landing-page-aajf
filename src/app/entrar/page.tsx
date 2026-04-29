@@ -6,6 +6,7 @@ import { isSupabaseConfigured } from "@/lib/supabase/config";
 type EntrarPageProps = {
   searchParams?: Promise<{
     error?: string;
+    next?: string;
   }>;
 };
 
@@ -55,6 +56,7 @@ export default async function EntrarPage({ searchParams }: EntrarPageProps) {
               <div className="mt-8">
                 <AuthForm
                   isConfigured={isConfigured}
+                  next={getSafeNextPath(params?.next)}
                   searchError={params?.error}
                 />
               </div>
@@ -64,4 +66,12 @@ export default async function EntrarPage({ searchParams }: EntrarPageProps) {
       </section>
     </main>
   );
+}
+
+function getSafeNextPath(next?: string) {
+  if (!next || !next.startsWith("/") || next.startsWith("//")) {
+    return "/";
+  }
+
+  return next;
 }

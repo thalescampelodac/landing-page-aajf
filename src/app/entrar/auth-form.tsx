@@ -11,10 +11,15 @@ const initialState: SignInState = {};
 
 type AuthFormProps = {
   isConfigured: boolean;
+  next?: string;
   searchError?: string;
 };
 
-export function AuthForm({ isConfigured, searchError }: AuthFormProps) {
+export function AuthForm({
+  isConfigured,
+  next = "/",
+  searchError,
+}: AuthFormProps) {
   const [state, formAction, isPending] = useActionState(
     signInWithPassword,
     initialState,
@@ -39,12 +44,19 @@ export function AuthForm({ isConfigured, searchError }: AuthFormProps) {
       ) : null}
 
       <form action={signInWithGoogle}>
-        <button className="secondary-button w-full" disabled={!isConfigured} type="submit">
+        <input name="next" type="hidden" value={next} />
+        <button
+          className="secondary-button w-full"
+          disabled={!isConfigured}
+          type="submit"
+        >
           Entrar com Google
         </button>
       </form>
 
       <form action={formAction} className="grid gap-4">
+        <input name="next" type="hidden" value={next} />
+
         <label className="form-field">
           <span>Email</span>
           <input
