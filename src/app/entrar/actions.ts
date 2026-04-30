@@ -1,5 +1,6 @@
 "use server";
 
+import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 import { getSiteUrl, isSupabaseConfigured } from "@/lib/supabase/config";
 import { createClient } from "@/lib/supabase/server";
@@ -42,11 +43,12 @@ export async function signInWithGoogle(formData: FormData) {
   }
 
   const next = getSafeNextPath(String(formData.get("next") || ""));
+  const siteUrl = await getActionSiteUrl();
   const supabase = await createClient();
   const { data, error } = await supabase.auth.signInWithOAuth({
     provider: "google",
     options: {
-      redirectTo: `${getSiteUrl()}/auth/callback?next=${encodeURIComponent(next)}`,
+      redirectTo: `${siteUrl}/auth/callback?next=${encodeURIComponent(next)}`,
     },
   });
 
@@ -72,4 +74,23 @@ function getSafeNextPath(next: string) {
   }
 
   return next;
+}
+
+async function getActionSiteUrl() {
+  const headerStore = await headers();
+  const origin = headerStore.get("origin");
+
+  if (origin) {
+    return origin;
+  }
+
+  const host = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const proto =
+    headerStore.get("x-forwarded-proto") || (host?.startsWith("localhost") ? "http" : "https");
+
+  if (host) {
+    return `${proto}://${host}`;
+  }
+
+  return getSiteUrl();
 }

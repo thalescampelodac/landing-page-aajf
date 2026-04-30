@@ -46,10 +46,10 @@ Em **Supabase > Authentication > URL Configuration**:
 
 ```text
 http://localhost:3000/**
-https://*-thalescampelodac.vercel.app/**
+https://*-thalescampelo-2658s-projects.vercel.app/**
 ```
 
-Se o Preview estiver em outro time/slug da Vercel, troque `thalescampelodac` pelo slug correto. A regra acima segue o padrão recomendado pela Supabase para previews da Vercel.
+Se o Preview estiver em outro time/slug da Vercel, troque `thalescampelo-2658s-projects` pelo slug correto. A regra acima segue o padrão recomendado pela Supabase para previews da Vercel.
 
 ## Supabase Data API
 
