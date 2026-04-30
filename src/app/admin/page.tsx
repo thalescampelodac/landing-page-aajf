@@ -1,6 +1,6 @@
-import Link from "next/link";
 import { redirect } from "next/navigation";
-import { signOut } from "@/app/entrar/actions";
+import Link from "next/link";
+import { AdminAccessPanel } from "@/components/admin-access-panel";
 import { getAdminAccess } from "@/lib/supabase/access";
 
 export default async function AdminPage() {
@@ -11,66 +11,54 @@ export default async function AdminPage() {
   }
 
   return (
-    <main className="section-shell flex-1 pb-16 pt-8">
-      <section className="soft-card rounded-[2rem] p-8 sm:p-10 lg:p-12">
-        <p className="section-eyebrow">Área Administrativa</p>
-
-        {access.status === "authorized" ? (
-          <>
-            <h1 className="section-title mt-4 max-w-3xl">
-              Bem-vindo à administração.
-            </h1>
-            <p className="section-description mt-6 max-w-2xl">
-              Seu acesso administrativo está ativo como {access.role}. Esta
-              área será a base para gerir associados, status e permissões.
+    <AdminAccessPanel
+      access={access}
+      authorizedDescription={`Seu acesso administrativo está ativo como ${access.status === "authorized" ? access.role : "administrador"}. Esta área agora funciona como hub inicial para gerir associados, status, permissões e comunicação interna.`}
+      authorizedTitle="Bem-vindo à administração."
+    >
+      <div className="grid gap-5 xl:grid-cols-[minmax(0,1.2fr)_minmax(17rem,0.8fr)]">
+        <div className="grid gap-5 md:grid-cols-2">
+          <Link
+            className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6 transition hover:-translate-y-0.5"
+            href="/admin/associados"
+          >
+            <p className="section-eyebrow">Módulo</p>
+            <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
+              Associados e status
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
+              Preparado para concessão de acesso, leitura de vínculo e gestão
+              do estado de cada associado.
             </p>
-            {access.email ? (
-              <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
-                Conta conectada: {access.email}
-              </p>
-            ) : null}
-          </>
-        ) : (
-          <>
-            <h1 className="section-title mt-4 max-w-3xl">
-              Acesso administrativo não autorizado.
-            </h1>
-            <p className="section-description mt-6 max-w-2xl">
-              O login confirma sua identidade, mas a permissão administrativa
-              precisa estar concedida no banco de dados pela associação.
-            </p>
-            {access.status === "unconfigured" ? (
-              <p className="mt-5 text-base font-medium text-[var(--color-red-deep)]">
-                Supabase ainda não está configurado neste ambiente.
-              </p>
-            ) : null}
-            {access.status === "denied" && access.email ? (
-              <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
-                Conta conectada: {access.email}
-              </p>
-            ) : null}
-          </>
-        )}
-
-        <div className="mt-8 flex flex-col gap-3 sm:flex-row">
-          <Link className="primary-button" href="/">
-            Voltar para a pagina inicial
           </Link>
-          {access.status === "authorized" ||
-          (access.status === "denied" && access.email) ? (
-            <form action={signOut}>
-              <button className="secondary-button" type="submit">
-                Sair da conta
-              </button>
-            </form>
-          ) : null}
-          {access.status === "authorized" ? null : (
-            <Link className="secondary-button" href="/entrar?next=/admin">
-              Entrar com outra conta
-            </Link>
-          )}
+
+          <Link
+            className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6 transition hover:-translate-y-0.5"
+            href="/admin/permissoes"
+          >
+            <p className="section-eyebrow">Módulo</p>
+            <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
+              Permissões
+            </h3>
+            <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
+              Reservado para papéis administrativos, regras de governança e
+              expansão da autorização por perfil.
+            </p>
+          </Link>
         </div>
-      </section>
-    </main>
+
+        <aside className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-[rgba(255,248,239,0.82)] p-6">
+          <p className="section-eyebrow">Estado Inicial</p>
+          <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
+            Painel pronto para expansão
+          </h3>
+          <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
+            A área administrativa já possui ponto de entrada dedicado,
+            navegação interna e contexto para receber os próximos módulos do
+            sistema sem depender da landing page pública.
+          </p>
+        </aside>
+      </div>
+    </AdminAccessPanel>
   );
 }

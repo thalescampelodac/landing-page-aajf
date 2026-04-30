@@ -67,5 +67,11 @@ describe("Admin page", () => {
     expect(
       screen.getByRole("button", { name: /Sair da conta/i }),
     ).toBeInTheDocument();
+    expect(
+      screen.getByRole("link", { name: /Associados e status/i }),
+    ).toHaveAttribute("href", "/admin/associados");
+    expect(
+      screen.getByRole("link", { name: /Permissões/i }),
+    ).toHaveAttribute("href", "/admin/permissoes");
   });
 });
