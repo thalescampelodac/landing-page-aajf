@@ -173,18 +173,40 @@ export async function createAdminBootstrapGrant(
 
   try {
     const adminSupabase = createAdminClient();
-    const { error: inviteError } = await adminSupabase.auth.admin.inviteUserByEmail(
-      email,
-      {
-        data: {
-          admin_role: role,
-        },
-        redirectTo: `${siteUrl}/primeiro-acesso?next=${encodeURIComponent("/admin")}`,
+    const redirectTo = `${siteUrl}/primeiro-acesso?next=${encodeURIComponent("/admin")}`;
+    const { error: inviteError } = await adminSupabase.auth.admin.inviteUserByEmail(email, {
+      data: {
+        admin_role: role,
       },
-    );
+      redirectTo,
+    });
 
     if (inviteError) {
-      return { error: inviteError.message };
+      const isAlreadyRegisteredError =
+        inviteError.message.toLowerCase().includes("already been registered") ||
+        inviteError.message.toLowerCase().includes("already registered");
+
+      if (!isAlreadyRegisteredError) {
+        return { error: inviteError.message };
+      }
+
+      const { error: recoveryError } = await adminSupabase.auth.resetPasswordForEmail(
+        email,
+        {
+          redirectTo,
+        },
+      );
+
+      if (recoveryError) {
+        return { error: recoveryError.message };
+      }
+
+      revalidatePath("/admin/permissoes");
+
+      return {
+        success:
+          "A autorização foi mantida e um email para definir ou renovar a senha foi enviado com sucesso.",
+      };
     }
   } catch (adminClientError) {
     return {

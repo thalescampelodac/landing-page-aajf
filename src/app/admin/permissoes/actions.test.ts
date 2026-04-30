@@ -11,6 +11,7 @@ const {
   getRequestSiteUrlMock,
   getUserMock,
   inviteUserByEmailMock,
+  resetPasswordForEmailMock,
   upsertMock,
   eqMock,
   maybeSingleMock,
@@ -24,6 +25,7 @@ const {
   inviteUserByEmailMock: vi.fn(),
   maybeSingleMock: vi.fn(),
   revalidatePathMock: vi.fn(),
+  resetPasswordForEmailMock: vi.fn(),
   upsertMock: vi.fn(),
 }));
 
@@ -89,6 +91,7 @@ describe("admin permissões actions", () => {
     inviteUserByEmailMock.mockReset();
     maybeSingleMock.mockReset();
     revalidatePathMock.mockReset();
+    resetPasswordForEmailMock.mockReset();
     upsertMock.mockReset();
   });
 
@@ -144,6 +147,7 @@ describe("admin permissões actions", () => {
         admin: {
           inviteUserByEmail: inviteUserByEmailMock,
         },
+        resetPasswordForEmail: resetPasswordForEmailMock,
       },
     });
     getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
@@ -167,6 +171,47 @@ describe("admin permissões actions", () => {
       redirectTo: "http://localhost:3000/primeiro-acesso?next=%2Fadmin",
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
+  });
+
+  it("usa recovery quando o email ja existe no Supabase", async () => {
+    getAdminAccessMock.mockResolvedValue({
+      status: "authorized",
+      email: "admin@example.com",
+      role: "super_admin",
+    });
+    createAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          inviteUserByEmail: inviteUserByEmailMock,
+        },
+        resetPasswordForEmail: resetPasswordForEmailMock,
+      },
+    });
+    getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
+    inviteUserByEmailMock.mockResolvedValue({
+      error: {
+        message: "A user with this email address has already been registered",
+      },
+    });
+    resetPasswordForEmailMock.mockResolvedValue({ error: null });
+    upsertMock.mockResolvedValue({ error: null });
+
+    const result = await createAdminBootstrapGrant(
+      {},
+      buildFormData({
+        email: "admin-existente@example.com",
+        notes: "Reenvio de acesso",
+        role: "admin",
+      }),
+    );
+
+    expect(result.success).toMatch(/renovar a senha/i);
+    expect(resetPasswordForEmailMock).toHaveBeenCalledWith(
+      "admin-existente@example.com",
+      {
+        redirectTo: "http://localhost:3000/primeiro-acesso?next=%2Fadmin",
+      },
+    );
   });
 
   it("revalida a pagina apos atualizar grant administrativo", async () => {
