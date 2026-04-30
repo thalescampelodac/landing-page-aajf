@@ -168,7 +168,8 @@ describe("admin permissões actions", () => {
       data: {
         admin_role: "admin",
       },
-      redirectTo: "http://localhost:3000/primeiro-acesso?next=%2Fadmin",
+      redirectTo:
+        "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
   });
@@ -209,7 +210,8 @@ describe("admin permissões actions", () => {
     expect(resetPasswordForEmailMock).toHaveBeenCalledWith(
       "admin-existente@example.com",
       {
-        redirectTo: "http://localhost:3000/primeiro-acesso?next=%2Fadmin",
+        redirectTo:
+          "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
       },
     );
   });

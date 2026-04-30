@@ -131,7 +131,8 @@ export function FirstAccessPasswordForm() {
       ) : (
         <p className="text-sm leading-7 text-[var(--color-muted)]">
           Depois de salvar a senha, o acesso seguirá normalmente com email e
-          senha.
+          senha. Se você já usava Google antes, esta etapa ainda é necessária
+          para habilitar o login por senha.
         </p>
       )}
 

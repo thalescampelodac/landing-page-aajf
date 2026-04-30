@@ -89,16 +89,37 @@ Para o fluxo de primeiro acesso administrativo:
 
 1. Abrir **Authentication**.
 2. Abrir **URL Configuration**.
-3. Garantir que a URL abaixo está permitida:
+3. Garantir que as URLs abaixo estão permitidas:
 
 ```text
+http://localhost:3000/auth/confirm
 http://localhost:3000/primeiro-acesso
 ```
 
 4. Adicionar também a URL equivalente de produção quando o domínio estiver definido.
-5. Em **Email Templates**, revisar o template de **Invite user** para orientar o novo administrador a abrir o convite e definir a própria senha no primeiro acesso.
+5. Em **Email Templates**, revisar os templates de **Invite user** e **Reset password** para usar `token_hash` e a rota `/auth/confirm`.
 
-O app usa o redirect `.../primeiro-acesso?next=/admin` ao enviar o convite administrativo.
+O app envia links com `redirectTo` em `.../auth/confirm?next=/primeiro-acesso?next=%2Fadmin`. Os templates devem acrescentar `token_hash` e `type` nessa URL.
+
+### Template Invite user
+
+Use um link neste formato:
+
+```html
+<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite">
+  Definir minha senha
+</a>
+```
+
+### Template Reset password
+
+Use um link neste formato:
+
+```html
+<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">
+  Definir ou renovar minha senha
+</a>
+```
 
 ## Expor schema para o app
 

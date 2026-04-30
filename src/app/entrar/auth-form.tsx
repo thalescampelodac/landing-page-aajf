@@ -112,5 +112,9 @@ function getSearchErrorMessage(error?: string) {
     return "Não foi possível iniciar o acesso com Google.";
   }
 
+  if (error === "first-access-link-invalid") {
+    return "O link de primeiro acesso ou redefinição de senha está inválido ou expirou. Solicite um novo email e abra o link mais recente.";
+  }
+
   return undefined;
 }

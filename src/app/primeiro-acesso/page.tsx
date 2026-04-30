@@ -12,7 +12,8 @@ export default function PrimeiroAcessoPage() {
         <p className="section-description mt-6 max-w-2xl">
           Este é o passo final do convite enviado por email. Depois de criar a
           sua senha, você poderá entrar normalmente com email e senha no portal
-          administrativo.
+          administrativo. Mesmo que sua conta já use Google, este é o lugar
+          certo para habilitar o acesso por senha.
         </p>
 
         <div className="mt-10 max-w-xl">

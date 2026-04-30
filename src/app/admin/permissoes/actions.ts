@@ -173,7 +173,9 @@ export async function createAdminBootstrapGrant(
 
   try {
     const adminSupabase = createAdminClient();
-    const redirectTo = `${siteUrl}/primeiro-acesso?next=${encodeURIComponent("/admin")}`;
+    const redirectTo = `${siteUrl}/auth/confirm?next=${encodeURIComponent(
+      "/primeiro-acesso?next=%2Fadmin",
+    )}`;
     const { error: inviteError } = await adminSupabase.auth.admin.inviteUserByEmail(email, {
       data: {
         admin_role: role,
