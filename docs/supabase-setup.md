@@ -33,7 +33,9 @@ Para desenvolvimento local, mantenha:
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
-Em Preview/Produção na Vercel, defina `NEXT_PUBLIC_SITE_URL` com a URL pública do ambiente quando ela estiver disponível.
+Em Production na Vercel, defina `NEXT_PUBLIC_SITE_URL` com a URL pública oficial.
+
+Em Preview, consulte [Ambiente Preview](./preview-environment.md). O app consegue usar `VERCEL_URL` como fallback para montar o redirect do deploy atual.
 
 ## Aplicar migration
 
@@ -74,6 +76,8 @@ http://localhost:3000/auth/callback
 ```text
 https://SEU_DOMINIO/auth/callback
 ```
+
+Para Preview na Vercel, adicione também a allowlist documentada em [Ambiente Preview](./preview-environment.md).
 
 ## Expor schema para o app
 
