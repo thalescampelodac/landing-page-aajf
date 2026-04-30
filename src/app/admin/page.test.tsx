@@ -14,6 +14,10 @@ vi.mock("@/lib/supabase/access", () => ({
   getAdminAccess: getAdminAccessMock,
 }));
 
+vi.mock("@/app/entrar/actions", () => ({
+  signOut: vi.fn(),
+}));
+
 describe("Admin page", () => {
   beforeEach(() => {
     redirectMock.mockClear();
@@ -42,6 +46,9 @@ describe("Admin page", () => {
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/pessoa@example.com/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Sair da conta/i }),
+    ).toBeInTheDocument();
   });
 
   it("renderiza area administrativa para admin ativo", async () => {
@@ -57,5 +64,8 @@ describe("Admin page", () => {
       screen.getByRole("heading", { name: /Bem-vindo à administração/i }),
     ).toBeInTheDocument();
     expect(screen.getByText(/super_admin/i)).toBeInTheDocument();
+    expect(
+      screen.getByRole("button", { name: /Sair da conta/i }),
+    ).toBeInTheDocument();
   });
 });

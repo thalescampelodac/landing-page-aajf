@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import { useActionState } from "react";
 import {
   SignInState,
@@ -80,6 +81,15 @@ export function AuthForm({
             type="password"
           />
         </label>
+
+        <div className="flex items-center justify-end">
+          <Link
+            className="text-sm font-medium text-[var(--color-green-deep)] underline-offset-4 transition hover:underline"
+            href="/recuperar-senha"
+          >
+            Esqueci minha senha
+          </Link>
+        </div>
 
         <button
           className="primary-button w-full"

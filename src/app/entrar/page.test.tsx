@@ -33,5 +33,8 @@ describe("Entrar page", () => {
     expect(
       screen.getByRole("button", { name: /Entrar com email e senha/i }),
     ).toBeDisabled();
+    expect(
+      screen.getByRole("link", { name: /Esqueci minha senha/i }),
+    ).toHaveAttribute("href", "/recuperar-senha");
   });
 });
