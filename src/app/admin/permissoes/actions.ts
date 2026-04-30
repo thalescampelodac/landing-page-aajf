@@ -1,6 +1,8 @@
 "use server";
 
 import { revalidatePath } from "next/cache";
+import { createAdminClient } from "@/lib/supabase/admin-client";
+import { getRequestSiteUrl } from "@/lib/site-url";
 import { getAdminAccess } from "@/lib/supabase/access";
 import { createClient } from "@/lib/supabase/server";
 
@@ -153,6 +155,7 @@ export async function createAdminBootstrapGrant(
     return { error: "Selecione um papel administrativo válido." };
   }
 
+  const siteUrl = await getRequestSiteUrl();
   const supabase = await createClient();
   const { error } = await supabase.schema("aajf").from("admin_bootstrap_grants").upsert(
     {
@@ -168,9 +171,33 @@ export async function createAdminBootstrapGrant(
     return { error: error.message };
   }
 
+  try {
+    const adminSupabase = createAdminClient();
+    const { error: inviteError } = await adminSupabase.auth.admin.inviteUserByEmail(
+      email,
+      {
+        data: {
+          admin_role: role,
+        },
+        redirectTo: `${siteUrl}/primeiro-acesso?next=${encodeURIComponent("/admin")}`,
+      },
+    );
+
+    if (inviteError) {
+      return { error: inviteError.message };
+    }
+  } catch (adminClientError) {
+    return {
+      error:
+        adminClientError instanceof Error
+          ? adminClientError.message
+          : "Não foi possível preparar o convite administrativo.",
+    };
+  }
+
   revalidatePath("/admin/permissoes");
 
-  return { success: "Autorização por email registrada com sucesso." };
+  return { success: "Autorização por email registrada e convite enviado com sucesso." };
 }
 
 export async function updateAdminBootstrapGrant(

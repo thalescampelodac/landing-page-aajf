@@ -12,6 +12,7 @@ Issue de origem: [#11 Criar schema inicial de acesso no Supabase](https://github
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
@@ -24,6 +25,7 @@ No dashboard do Supabase:
 3. Ir em **Project Settings**.
 4. Abrir **API Keys**.
 5. Copiar uma **Publishable key** para `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+6. Copiar a **service_role key** para `SUPABASE_SERVICE_ROLE_KEY` apenas no servidor.
 
 Não use `secret` nem `service_role` em variáveis `NEXT_PUBLIC_`, porque elas ficam disponíveis no navegador.
 
@@ -44,6 +46,7 @@ Arquivo:
 ```text
 supabase/migrations/20260429150747_initial_access_schema.sql
 supabase/migrations/20260429160126_admin_bootstrap.sql
+supabase/migrations/20260430130500_grant_authenticated_table_privileges.sql
 ```
 
 Opção pelo dashboard:
@@ -52,6 +55,7 @@ Opção pelo dashboard:
 2. Colar o conteúdo da migration.
 3. Executar o SQL.
 4. Conferir se as tabelas foram criadas no schema `aajf`.
+5. Conferir se os privilégios SQL foram aplicados para `authenticated`.
 
 Opção pela CLI, quando o projeto estiver linkado:
 
@@ -78,6 +82,23 @@ https://SEU_DOMINIO/auth/callback
 ```
 
 Para Preview na Vercel, adicione também a allowlist documentada em [Ambiente Preview](./preview-environment.md).
+
+## Configurar convite por email
+
+Para o fluxo de primeiro acesso administrativo:
+
+1. Abrir **Authentication**.
+2. Abrir **URL Configuration**.
+3. Garantir que a URL abaixo está permitida:
+
+```text
+http://localhost:3000/primeiro-acesso
+```
+
+4. Adicionar também a URL equivalente de produção quando o domínio estiver definido.
+5. Em **Email Templates**, revisar o template de **Invite user** para orientar o novo administrador a abrir o convite e definir a própria senha no primeiro acesso.
+
+O app usa o redirect `.../primeiro-acesso?next=/admin` ao enviar o convite administrativo.
 
 ## Expor schema para o app
 

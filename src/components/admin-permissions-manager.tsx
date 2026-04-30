@@ -63,18 +63,19 @@ export function AdminPermissionsManager({
         </article>
 
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-[rgba(255,248,239,0.82)] p-6">
-          <p className="section-eyebrow">Conceder acesso direto</p>
+          <p className="section-eyebrow">Promover perfil existente</p>
           <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Transformar um perfil existente em administrador
+            Conceder acesso a quem já entrou no sistema
           </h3>
           <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
             Use este fluxo quando a pessoa já entrou no sistema e já possui
-            perfil em `aajf.profiles`.
+            perfil em `aajf.profiles`. Para novos administradores que ainda não
+            entraram, use o convite por email no bloco ao lado.
           </p>
 
           <form action={grantAccessAction} className="mt-6 grid gap-4">
             <label className="form-field">
-              <span>Perfil elegível</span>
+              <span>Perfil existente</span>
               <select
                 className="rounded-2xl border border-[rgba(23,54,45,0.12)] bg-white/88 px-4 py-3 text-[var(--color-ink)]"
                 defaultValue=""
@@ -130,13 +131,13 @@ export function AdminPermissionsManager({
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6">
-          <p className="section-eyebrow">Autorizações por email</p>
+          <p className="section-eyebrow">Convites por email</p>
           <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Quem ainda vai receber acesso ao entrar pela primeira vez
+            Quem vai receber o primeiro acesso por email
           </h3>
           <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
             Esta lista usa `admin_bootstrap_grants` para preparar autorização
-            antecipada antes de existir um perfil autenticado.
+            antecipada e registrar quem ainda deve concluir o primeiro acesso.
           </p>
 
           <div className="mt-6 grid gap-4">
@@ -153,13 +154,14 @@ export function AdminPermissionsManager({
         </article>
 
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-[rgba(255,248,239,0.82)] p-6">
-          <p className="section-eyebrow">Preparar autorização</p>
+          <p className="section-eyebrow">Convidar novo administrador</p>
           <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Autorizar um novo email administrativo
+            Enviar convite para primeiro acesso
           </h3>
           <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-            Use este fluxo quando a pessoa ainda não entrou no sistema, mas já
-            precisa estar autorizada para receber acesso administrativo.
+            Use este fluxo quando a pessoa ainda não entrou no sistema. O email
+            será autorizado e o Supabase enviará o convite para que ela defina
+            a própria senha no primeiro acesso.
           </p>
 
           <form action={bootstrapAction} className="mt-6 grid gap-4">
@@ -196,7 +198,7 @@ export function AdminPermissionsManager({
               disabled={isCreatingBootstrap}
               type="submit"
             >
-              {isCreatingBootstrap ? "Salvando..." : "Registrar autorização"}
+              {isCreatingBootstrap ? "Salvando..." : "Autorizar e enviar convite"}
             </button>
           </form>
         </article>
@@ -297,6 +299,9 @@ function AdminBootstrapGrantRow({
           </p>
           <p className="mt-1 text-sm text-[var(--color-muted)]">
             Papel planejado: {grant.role}
+          </p>
+          <p className="mt-2 text-xs uppercase tracking-[0.18em] text-[var(--color-red)]">
+            Status atual: {grant.status}
           </p>
           {grant.notes ? (
             <p className="mt-3 text-sm leading-7 text-[var(--color-green-deep)]">

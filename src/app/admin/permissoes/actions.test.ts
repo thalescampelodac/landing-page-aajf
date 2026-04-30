@@ -6,20 +6,24 @@ import {
 } from "@/app/admin/permissoes/actions";
 
 const {
+  createAdminClientMock,
   getAdminAccessMock,
+  getRequestSiteUrlMock,
   getUserMock,
+  inviteUserByEmailMock,
   upsertMock,
-  updateMock,
   eqMock,
   maybeSingleMock,
   revalidatePathMock,
 } = vi.hoisted(() => ({
+  createAdminClientMock: vi.fn(),
   eqMock: vi.fn(),
   getAdminAccessMock: vi.fn(),
+  getRequestSiteUrlMock: vi.fn(),
   getUserMock: vi.fn(),
+  inviteUserByEmailMock: vi.fn(),
   maybeSingleMock: vi.fn(),
   revalidatePathMock: vi.fn(),
-  updateMock: vi.fn(),
   upsertMock: vi.fn(),
 }));
 
@@ -29,6 +33,14 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@/lib/supabase/access", () => ({
   getAdminAccess: getAdminAccessMock,
+}));
+
+vi.mock("@/lib/site-url", () => ({
+  getRequestSiteUrl: getRequestSiteUrlMock,
+}));
+
+vi.mock("@/lib/supabase/admin-client", () => ({
+  createAdminClient: createAdminClientMock,
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -69,12 +81,14 @@ vi.mock("@/lib/supabase/server", () => ({
 
 describe("admin permissões actions", () => {
   beforeEach(() => {
+    createAdminClientMock.mockReset();
     eqMock.mockReset();
     getAdminAccessMock.mockReset();
+    getRequestSiteUrlMock.mockReset();
     getUserMock.mockReset();
+    inviteUserByEmailMock.mockReset();
     maybeSingleMock.mockReset();
     revalidatePathMock.mockReset();
-    updateMock.mockReset();
     upsertMock.mockReset();
   });
 
@@ -125,6 +139,15 @@ describe("admin permissões actions", () => {
       email: "admin@example.com",
       role: "super_admin",
     });
+    createAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          inviteUserByEmail: inviteUserByEmailMock,
+        },
+      },
+    });
+    getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
+    inviteUserByEmailMock.mockResolvedValue({ error: null });
     upsertMock.mockResolvedValue({ error: null });
 
     const result = await createAdminBootstrapGrant(
@@ -136,7 +159,13 @@ describe("admin permissões actions", () => {
       }),
     );
 
-    expect(result.success).toMatch(/Autorização por email registrada/i);
+    expect(result.success).toMatch(/convite enviado/i);
+    expect(inviteUserByEmailMock).toHaveBeenCalledWith("novo-admin@example.com", {
+      data: {
+        admin_role: "admin",
+      },
+      redirectTo: "http://localhost:3000/primeiro-acesso?next=%2Fadmin",
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
   });
 

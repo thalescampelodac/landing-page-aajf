@@ -90,7 +90,7 @@ describe("AdminPermissoesPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: /Autorizar um novo email administrativo/i,
+        name: /Enviar convite para primeiro acesso/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/novo-admin@example.com/i)).toBeInTheDocument();
