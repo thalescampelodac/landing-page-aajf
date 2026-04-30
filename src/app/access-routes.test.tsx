@@ -5,9 +5,11 @@ import AssociadoPage from "@/app/associado/page";
 describe("placeholder routes", () => {
   it("renderiza a area do associado", () => {
     render(<AssociadoPage />);
-    expect(screen.getByText(/Área em construção/i)).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /vida da associação/i }),
+    ).toBeInTheDocument();
+    expect(
+      screen.getByRole("heading", { name: /Alteração de senha/i }),
     ).toBeInTheDocument();
   });
 

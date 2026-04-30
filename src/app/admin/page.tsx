@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
+import { signOut } from "@/app/entrar/actions";
 import { getAdminAccess } from "@/lib/supabase/access";
 
 export default async function AdminPage() {
@@ -55,6 +56,14 @@ export default async function AdminPage() {
           <Link className="primary-button" href="/">
             Voltar para a pagina inicial
           </Link>
+          {access.status === "authorized" ||
+          (access.status === "denied" && access.email) ? (
+            <form action={signOut}>
+              <button className="secondary-button" type="submit">
+                Sair da conta
+              </button>
+            </form>
+          ) : null}
           {access.status === "authorized" ? null : (
             <Link className="secondary-button" href="/entrar?next=/admin">
               Entrar com outra conta
