@@ -121,6 +121,22 @@ Use um link neste formato:
 </a>
 ```
 
+## Modo provisório sem SMTP
+
+Enquanto o domínio institucional e o SMTP não estiverem disponíveis, o módulo
+`/admin/permissoes` pode funcionar sem envio de email.
+
+Nesse modo:
+
+1. o admin registra o email no formulário;
+2. o backend gera um link temporário com `auth.admin.generateLink()`;
+3. a interface mostra esse link para cópia manual;
+4. o link pode ser repassado por mensagem ao novo administrador.
+
+Esse modo evita o rate limit de email do provedor nativo do Supabase e permite
+validar o fluxo completo de primeiro acesso antes da infraestrutura final de
+email estar pronta.
+
 ## Expor schema para o app
 
 Para o app consultar permissões usando RLS:

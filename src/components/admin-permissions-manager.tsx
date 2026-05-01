@@ -156,12 +156,13 @@ export function AdminPermissionsManager({
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-[rgba(255,248,239,0.82)] p-6">
           <p className="section-eyebrow">Convidar novo administrador</p>
           <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Enviar convite para primeiro acesso
+            Gerar link para primeiro acesso
           </h3>
           <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
             Use este fluxo quando a pessoa ainda não entrou no sistema. O email
-            será autorizado e o Supabase enviará o convite para que ela defina
-            a própria senha no primeiro acesso.
+            será autorizado e o sistema vai gerar um link provisório para você
+            copiar e repassar manualmente, até que o envio institucional por
+            email esteja configurado.
           </p>
 
           <form action={bootstrapAction} className="mt-6 grid gap-4">
@@ -198,7 +199,7 @@ export function AdminPermissionsManager({
               disabled={isCreatingBootstrap}
               type="submit"
             >
-              {isCreatingBootstrap ? "Salvando..." : "Autorizar e enviar convite"}
+              {isCreatingBootstrap ? "Salvando..." : "Autorizar e gerar link"}
             </button>
           </form>
         </article>
@@ -344,11 +345,21 @@ function ActionFeedback({ state }: { state: AdminPermissionsActionState }) {
     return <p className="text-sm font-medium text-[var(--color-red-deep)]">{state.error}</p>;
   }
 
-  if (state.success) {
+  if (state.success || state.manualLink) {
     return (
-      <p className="text-sm font-medium text-[var(--color-green-deep)]">
-        {state.success}
-      </p>
+      <div className="grid gap-3">
+        {state.success ? (
+          <p className="text-sm font-medium text-[var(--color-green-deep)]">
+            {state.success}
+          </p>
+        ) : null}
+        {state.manualLink ? (
+          <label className="form-field">
+            <span>{state.manualLinkLabel || "Link gerado"}</span>
+            <textarea className="min-h-24 text-sm" readOnly value={state.manualLink} />
+          </label>
+        ) : null}
+      </div>
     );
   }
 

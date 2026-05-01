@@ -8,10 +8,9 @@ import {
 const {
   createAdminClientMock,
   getAdminAccessMock,
+  generateLinkMock,
   getRequestSiteUrlMock,
   getUserMock,
-  inviteUserByEmailMock,
-  resetPasswordForEmailMock,
   upsertMock,
   eqMock,
   maybeSingleMock,
@@ -19,13 +18,12 @@ const {
 } = vi.hoisted(() => ({
   createAdminClientMock: vi.fn(),
   eqMock: vi.fn(),
+  generateLinkMock: vi.fn(),
   getAdminAccessMock: vi.fn(),
   getRequestSiteUrlMock: vi.fn(),
   getUserMock: vi.fn(),
-  inviteUserByEmailMock: vi.fn(),
   maybeSingleMock: vi.fn(),
   revalidatePathMock: vi.fn(),
-  resetPasswordForEmailMock: vi.fn(),
   upsertMock: vi.fn(),
 }));
 
@@ -85,13 +83,12 @@ describe("admin permissões actions", () => {
   beforeEach(() => {
     createAdminClientMock.mockReset();
     eqMock.mockReset();
+    generateLinkMock.mockReset();
     getAdminAccessMock.mockReset();
     getRequestSiteUrlMock.mockReset();
     getUserMock.mockReset();
-    inviteUserByEmailMock.mockReset();
     maybeSingleMock.mockReset();
     revalidatePathMock.mockReset();
-    resetPasswordForEmailMock.mockReset();
     upsertMock.mockReset();
   });
 
@@ -145,13 +142,20 @@ describe("admin permissões actions", () => {
     createAdminClientMock.mockReturnValue({
       auth: {
         admin: {
-          inviteUserByEmail: inviteUserByEmailMock,
+          generateLink: generateLinkMock,
         },
-        resetPasswordForEmail: resetPasswordForEmailMock,
       },
     });
     getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
-    inviteUserByEmailMock.mockResolvedValue({ error: null });
+    generateLinkMock.mockResolvedValue({
+      data: {
+        properties: {
+          hashed_token: "token-invite",
+          verification_type: "invite",
+        },
+      },
+      error: null,
+    });
     upsertMock.mockResolvedValue({ error: null });
 
     const result = await createAdminBootstrapGrant(
@@ -163,13 +167,20 @@ describe("admin permissões actions", () => {
       }),
     );
 
-    expect(result.success).toMatch(/convite enviado/i);
-    expect(inviteUserByEmailMock).toHaveBeenCalledWith("novo-admin@example.com", {
-      data: {
-        admin_role: "admin",
+    expect(result.success).toMatch(/link provisório/i);
+    expect(result.manualLink).toBe(
+      "http://localhost:3000/auth/confirm?token_hash=token-invite&type=invite&next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+    );
+    expect(generateLinkMock).toHaveBeenCalledWith({
+      email: "novo-admin@example.com",
+      options: {
+        data: {
+          admin_role: "admin",
+        },
+        redirectTo:
+          "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
       },
-      redirectTo:
-        "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+      type: "invite",
     });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
   });
@@ -183,18 +194,26 @@ describe("admin permissões actions", () => {
     createAdminClientMock.mockReturnValue({
       auth: {
         admin: {
-          inviteUserByEmail: inviteUserByEmailMock,
+          generateLink: generateLinkMock,
         },
-        resetPasswordForEmail: resetPasswordForEmailMock,
       },
     });
     getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
-    inviteUserByEmailMock.mockResolvedValue({
-      error: {
-        message: "A user with this email address has already been registered",
-      },
-    });
-    resetPasswordForEmailMock.mockResolvedValue({ error: null });
+    generateLinkMock
+      .mockResolvedValueOnce({
+        error: {
+          message: "A user with this email address has already been registered",
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          properties: {
+            hashed_token: "token-recovery",
+            verification_type: "recovery",
+          },
+        },
+        error: null,
+      });
     upsertMock.mockResolvedValue({ error: null });
 
     const result = await createAdminBootstrapGrant(
@@ -206,14 +225,18 @@ describe("admin permissões actions", () => {
       }),
     );
 
-    expect(result.success).toMatch(/renovar a senha/i);
-    expect(resetPasswordForEmailMock).toHaveBeenCalledWith(
-      "admin-existente@example.com",
-      {
+    expect(result.success).toMatch(/link provisório/i);
+    expect(result.manualLink).toBe(
+      "http://localhost:3000/auth/confirm?token_hash=token-recovery&type=recovery&next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+    );
+    expect(generateLinkMock).toHaveBeenNthCalledWith(2, {
+      email: "admin-existente@example.com",
+      options: {
         redirectTo:
           "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
       },
-    );
+      type: "recovery",
+    });
   });
 
   it("revalida a pagina apos atualizar grant administrativo", async () => {

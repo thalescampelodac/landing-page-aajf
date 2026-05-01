@@ -8,6 +8,8 @@ import { createClient } from "@/lib/supabase/server";
 
 export type AdminPermissionsActionState = {
   error?: string;
+  manualLink?: string;
+  manualLinkLabel?: string;
   success?: string;
 };
 
@@ -173,55 +175,78 @@ export async function createAdminBootstrapGrant(
 
   try {
     const adminSupabase = createAdminClient();
-    const redirectTo = `${siteUrl}/auth/confirm?next=${encodeURIComponent(
-      "/primeiro-acesso?next=%2Fadmin",
-    )}`;
-    const { error: inviteError } = await adminSupabase.auth.admin.inviteUserByEmail(email, {
-      data: {
-        admin_role: role,
-      },
-      redirectTo,
-    });
-
-    if (inviteError) {
-      const isAlreadyRegisteredError =
-        inviteError.message.toLowerCase().includes("already been registered") ||
-        inviteError.message.toLowerCase().includes("already registered");
-
-      if (!isAlreadyRegisteredError) {
-        return { error: inviteError.message };
-      }
-
-      const { error: recoveryError } = await adminSupabase.auth.resetPasswordForEmail(
+    const next = "/primeiro-acesso?next=%2Fadmin";
+    const redirectTo = `${siteUrl}/auth/confirm?next=${encodeURIComponent(next)}`;
+    const { data: inviteData, error: inviteError } =
+      await adminSupabase.auth.admin.generateLink({
+        type: "invite",
         email,
-        {
+        options: {
+          data: {
+            admin_role: role,
+          },
           redirectTo,
         },
-      );
+      });
 
-      if (recoveryError) {
-        return { error: recoveryError.message };
-      }
-
+    if (!inviteError) {
       revalidatePath("/admin/permissoes");
 
       return {
+        manualLink: buildManualFirstAccessLink(
+          siteUrl,
+          inviteData.properties.hashed_token,
+          inviteData.properties.verification_type,
+          next,
+        ),
+        manualLinkLabel: "Link provisório de primeiro acesso",
         success:
-          "A autorização foi mantida e um email para definir ou renovar a senha foi enviado com sucesso.",
+          "Autorização por email registrada e link provisório de primeiro acesso gerado com sucesso.",
       };
     }
+
+    const isAlreadyRegisteredError =
+      inviteError.message.toLowerCase().includes("already been registered") ||
+      inviteError.message.toLowerCase().includes("already registered");
+
+    if (!isAlreadyRegisteredError) {
+      return { error: inviteError.message };
+    }
+
+    const { data: recoveryData, error: recoveryError } =
+      await adminSupabase.auth.admin.generateLink({
+        type: "recovery",
+        email,
+        options: {
+          redirectTo,
+        },
+      });
+
+    if (recoveryError) {
+      return { error: recoveryError.message };
+    }
+
+    revalidatePath("/admin/permissoes");
+
+    return {
+      manualLink: buildManualFirstAccessLink(
+        siteUrl,
+        recoveryData.properties.hashed_token,
+        recoveryData.properties.verification_type,
+        next,
+      ),
+      manualLinkLabel: "Link provisório para definir ou renovar a senha",
+      success:
+        "A autorização foi mantida e um link provisório para definir ou renovar a senha foi gerado com sucesso.",
+    };
   } catch (adminClientError) {
     return {
       error:
         adminClientError instanceof Error
           ? adminClientError.message
-          : "Não foi possível preparar o convite administrativo.",
+          : "Não foi possível preparar o link administrativo.",
     };
   }
-
-  revalidatePath("/admin/permissoes");
-
-  return { success: "Autorização por email registrada e convite enviado com sucesso." };
 }
 
 export async function updateAdminBootstrapGrant(
@@ -275,4 +300,15 @@ function isValidBootstrapGrantStatus(
   status: string,
 ): status is "pending" | "claimed" | "revoked" {
   return status === "pending" || status === "claimed" || status === "revoked";
+}
+
+function buildManualFirstAccessLink(
+  siteUrl: string,
+  tokenHash: string,
+  verificationType: string,
+  next: string,
+) {
+  return `${siteUrl}/auth/confirm?token_hash=${encodeURIComponent(
+    tokenHash,
+  )}&type=${encodeURIComponent(verificationType)}&next=${encodeURIComponent(next)}`;
 }
