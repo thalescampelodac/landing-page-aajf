@@ -16,6 +16,7 @@ vi.mock("@/lib/supabase/admin-permissions", () => ({
 
 vi.mock("@/app/admin/permissoes/actions", () => ({
   grantAdminAccess: vi.fn(),
+  removeAdminUser: vi.fn(),
   updateAdminMembership: vi.fn(),
   createAdminBootstrapGrant: vi.fn(),
   updateAdminBootstrapGrant: vi.fn(),
