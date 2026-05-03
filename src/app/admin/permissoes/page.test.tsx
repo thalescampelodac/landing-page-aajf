@@ -16,6 +16,7 @@ vi.mock("@/lib/supabase/admin-permissions", () => ({
 
 vi.mock("@/app/admin/permissoes/actions", () => ({
   grantAdminAccess: vi.fn(),
+  removeAdminUser: vi.fn(),
   updateAdminMembership: vi.fn(),
   createAdminBootstrapGrant: vi.fn(),
   updateAdminBootstrapGrant: vi.fn(),
@@ -41,6 +42,7 @@ describe("AdminPermissoesPage", () => {
     getAdminPermissionsDataMock.mockResolvedValue({
       access: {
         email: "admin@example.com",
+        profileId: "profile-admin",
         role: "super_admin",
         status: "authorized",
       },
@@ -90,7 +92,7 @@ describe("AdminPermissoesPage", () => {
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", {
-        name: /Autorizar um novo email administrativo/i,
+        name: /Gerar link para primeiro acesso/i,
       }),
     ).toBeInTheDocument();
     expect(screen.getByText(/novo-admin@example.com/i)).toBeInTheDocument();

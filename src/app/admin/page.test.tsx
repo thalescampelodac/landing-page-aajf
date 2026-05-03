@@ -54,6 +54,7 @@ describe("Admin page", () => {
   it("renderiza area administrativa para admin ativo", async () => {
     getAdminAccessMock.mockResolvedValue({
       email: "admin@example.com",
+      profileId: "profile-admin",
       role: "super_admin",
       status: "authorized",
     });
@@ -63,7 +64,7 @@ describe("Admin page", () => {
     expect(
       screen.getByRole("heading", { name: /Bem-vindo à administração/i }),
     ).toBeInTheDocument();
-    expect(screen.getByText(/super_admin/i)).toBeInTheDocument();
+    expect(screen.getByText(/Papel atual: super_admin/i)).toBeInTheDocument();
     expect(
       screen.getByRole("button", { name: /Sair da conta/i }),
     ).toBeInTheDocument();

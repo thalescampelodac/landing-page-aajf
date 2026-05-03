@@ -1,25 +1,34 @@
 import {
   createAdminBootstrapGrant,
   grantAdminAccess,
+  removeAdminUser,
   updateAdminBootstrapGrant,
   updateAdminMembership,
 } from "@/app/admin/permissoes/actions";
 
 const {
+  createAdminClientMock,
   getAdminAccessMock,
+  generateLinkMock,
+  getRequestSiteUrlMock,
   getUserMock,
   upsertMock,
-  updateMock,
   eqMock,
+  deleteBootstrapGrantsEqMock,
+  deleteUserMock,
   maybeSingleMock,
   revalidatePathMock,
 } = vi.hoisted(() => ({
+  createAdminClientMock: vi.fn(),
+  deleteBootstrapGrantsEqMock: vi.fn(),
+  deleteUserMock: vi.fn(),
   eqMock: vi.fn(),
+  generateLinkMock: vi.fn(),
   getAdminAccessMock: vi.fn(),
+  getRequestSiteUrlMock: vi.fn(),
   getUserMock: vi.fn(),
   maybeSingleMock: vi.fn(),
   revalidatePathMock: vi.fn(),
-  updateMock: vi.fn(),
   upsertMock: vi.fn(),
 }));
 
@@ -29,6 +38,14 @@ vi.mock("next/cache", () => ({
 
 vi.mock("@/lib/supabase/access", () => ({
   getAdminAccess: getAdminAccessMock,
+}));
+
+vi.mock("@/lib/site-url", () => ({
+  getRequestSiteUrl: getRequestSiteUrlMock,
+}));
+
+vi.mock("@/lib/supabase/admin-client", () => ({
+  createAdminClient: createAdminClientMock,
 }));
 
 vi.mock("@/lib/supabase/server", () => ({
@@ -54,6 +71,9 @@ vi.mock("@/lib/supabase/server", () => ({
 
         if (table === "admin_bootstrap_grants") {
           return {
+            delete: vi.fn(() => ({
+              eq: deleteBootstrapGrantsEqMock,
+            })),
             update: vi.fn(() => ({
               eq: eqMock,
             })),
@@ -69,12 +89,16 @@ vi.mock("@/lib/supabase/server", () => ({
 
 describe("admin permissões actions", () => {
   beforeEach(() => {
+    createAdminClientMock.mockReset();
+    deleteBootstrapGrantsEqMock.mockReset();
+    deleteUserMock.mockReset();
     eqMock.mockReset();
+    generateLinkMock.mockReset();
     getAdminAccessMock.mockReset();
+    getRequestSiteUrlMock.mockReset();
     getUserMock.mockReset();
     maybeSingleMock.mockReset();
     revalidatePathMock.mockReset();
-    updateMock.mockReset();
     upsertMock.mockReset();
   });
 
@@ -125,6 +149,23 @@ describe("admin permissões actions", () => {
       email: "admin@example.com",
       role: "super_admin",
     });
+    createAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          generateLink: generateLinkMock,
+        },
+      },
+    });
+    getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
+    generateLinkMock.mockResolvedValue({
+      data: {
+        properties: {
+          hashed_token: "token-invite",
+          verification_type: "invite",
+        },
+      },
+      error: null,
+    });
     upsertMock.mockResolvedValue({ error: null });
 
     const result = await createAdminBootstrapGrant(
@@ -136,8 +177,76 @@ describe("admin permissões actions", () => {
       }),
     );
 
-    expect(result.success).toMatch(/Autorização por email registrada/i);
+    expect(result.success).toMatch(/link provisório/i);
+    expect(result.manualLink).toBe(
+      "http://localhost:3000/auth/confirm?token_hash=token-invite&type=invite&next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+    );
+    expect(generateLinkMock).toHaveBeenCalledWith({
+      email: "novo-admin@example.com",
+      options: {
+        data: {
+          admin_role: "admin",
+        },
+        redirectTo:
+          "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+      },
+      type: "invite",
+    });
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
+  });
+
+  it("usa recovery quando o email ja existe no Supabase", async () => {
+    getAdminAccessMock.mockResolvedValue({
+      status: "authorized",
+      email: "admin@example.com",
+      role: "super_admin",
+    });
+    createAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          generateLink: generateLinkMock,
+        },
+      },
+    });
+    getRequestSiteUrlMock.mockResolvedValue("http://localhost:3000");
+    generateLinkMock
+      .mockResolvedValueOnce({
+        error: {
+          message: "A user with this email address has already been registered",
+        },
+      })
+      .mockResolvedValueOnce({
+        data: {
+          properties: {
+            hashed_token: "token-recovery",
+            verification_type: "recovery",
+          },
+        },
+        error: null,
+      });
+    upsertMock.mockResolvedValue({ error: null });
+
+    const result = await createAdminBootstrapGrant(
+      {},
+      buildFormData({
+        email: "admin-existente@example.com",
+        notes: "Reenvio de acesso",
+        role: "admin",
+      }),
+    );
+
+    expect(result.success).toMatch(/link provisório/i);
+    expect(result.manualLink).toBe(
+      "http://localhost:3000/auth/confirm?token_hash=token-recovery&type=recovery&next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+    );
+    expect(generateLinkMock).toHaveBeenNthCalledWith(2, {
+      email: "admin-existente@example.com",
+      options: {
+        redirectTo:
+          "http://localhost:3000/auth/confirm?next=%2Fprimeiro-acesso%3Fnext%3D%252Fadmin",
+      },
+      type: "recovery",
+    });
   });
 
   it("revalida a pagina apos atualizar grant administrativo", async () => {
@@ -157,6 +266,93 @@ describe("admin permissões actions", () => {
     );
 
     expect(result.success).toMatch(/Grant administrativo atualizado/i);
+    expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
+  });
+
+  it("so permite remocao de usuario admin para super_admin", async () => {
+    getAdminAccessMock.mockResolvedValue({
+      status: "authorized",
+      email: "admin@example.com",
+      role: "admin",
+    });
+
+    const result = await removeAdminUser(
+      {},
+      buildFormData({
+        membershipId: "membership-1",
+      }),
+    );
+
+    expect(result.error).toMatch(/Apenas super_admin/i);
+  });
+
+  it("impede que a conta atual remova a si propria", async () => {
+    getAdminAccessMock.mockResolvedValue({
+      status: "authorized",
+      email: "admin@example.com",
+      role: "super_admin",
+    });
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "profile-admin" } },
+    });
+    maybeSingleMock.mockResolvedValue({
+      data: {
+        profile: { email: "admin@example.com" },
+        profile_id: "profile-admin",
+      },
+      error: null,
+    });
+
+    const result = await removeAdminUser(
+      {},
+      buildFormData({
+        membershipId: "membership-1",
+      }),
+    );
+
+    expect(result.error).toMatch(/não pode remover a própria conta/i);
+  });
+
+  it("remove usuario admin e revalida a pagina", async () => {
+    getAdminAccessMock.mockResolvedValue({
+      status: "authorized",
+      email: "admin@example.com",
+      role: "super_admin",
+    });
+    getUserMock.mockResolvedValue({
+      data: { user: { id: "profile-admin" } },
+    });
+    maybeSingleMock.mockResolvedValue({
+      data: {
+        profile: { email: "outro-admin@example.com" },
+        profile_id: "profile-target",
+      },
+      error: null,
+    });
+    deleteBootstrapGrantsEqMock.mockResolvedValue({ error: null });
+    createAdminClientMock.mockReturnValue({
+      auth: {
+        admin: {
+          deleteUser: deleteUserMock,
+          generateLink: generateLinkMock,
+        },
+      },
+    });
+    deleteUserMock.mockResolvedValue({ error: null });
+
+    const result = await removeAdminUser(
+      {},
+      buildFormData({
+        membershipId: "membership-1",
+      }),
+    );
+
+    expect(deleteBootstrapGrantsEqMock).toHaveBeenCalledWith(
+      "normalized_email",
+      "outro-admin@example.com",
+    );
+    expect(deleteUserMock).toHaveBeenCalledWith("profile-target");
+    expect(result.success).toMatch(/removido com sucesso/i);
     expect(revalidatePathMock).toHaveBeenCalledWith("/admin/permissoes");
   });
 });

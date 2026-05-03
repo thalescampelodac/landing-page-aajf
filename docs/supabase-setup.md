@@ -12,6 +12,7 @@ Issue de origem: [#11 Criar schema inicial de acesso no Supabase](https://github
 ```env
 NEXT_PUBLIC_SUPABASE_URL=
 NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY=
+SUPABASE_SERVICE_ROLE_KEY=
 NEXT_PUBLIC_SITE_URL=http://localhost:3000
 ```
 
@@ -24,6 +25,7 @@ No dashboard do Supabase:
 3. Ir em **Project Settings**.
 4. Abrir **API Keys**.
 5. Copiar uma **Publishable key** para `NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY`.
+6. Copiar a **service_role key** para `SUPABASE_SERVICE_ROLE_KEY` apenas no servidor.
 
 Não use `secret` nem `service_role` em variáveis `NEXT_PUBLIC_`, porque elas ficam disponíveis no navegador.
 
@@ -44,6 +46,7 @@ Arquivo:
 ```text
 supabase/migrations/20260429150747_initial_access_schema.sql
 supabase/migrations/20260429160126_admin_bootstrap.sql
+supabase/migrations/20260430130500_grant_authenticated_table_privileges.sql
 ```
 
 Opção pelo dashboard:
@@ -52,6 +55,7 @@ Opção pelo dashboard:
 2. Colar o conteúdo da migration.
 3. Executar o SQL.
 4. Conferir se as tabelas foram criadas no schema `aajf`.
+5. Conferir se os privilégios SQL foram aplicados para `authenticated`.
 
 Opção pela CLI, quando o projeto estiver linkado:
 
@@ -78,6 +82,60 @@ https://SEU_DOMINIO/auth/callback
 ```
 
 Para Preview na Vercel, adicione também a allowlist documentada em [Ambiente Preview](./preview-environment.md).
+
+## Configurar convite por email
+
+Para o fluxo de primeiro acesso administrativo:
+
+1. Abrir **Authentication**.
+2. Abrir **URL Configuration**.
+3. Garantir que as URLs abaixo estão permitidas:
+
+```text
+http://localhost:3000/auth/confirm
+http://localhost:3000/primeiro-acesso
+```
+
+4. Adicionar também a URL equivalente de produção quando o domínio estiver definido.
+5. Em **Email Templates**, revisar os templates de **Invite user** e **Reset password** para usar `token_hash` e a rota `/auth/confirm`.
+
+O app envia links com `redirectTo` em `.../auth/confirm?next=/primeiro-acesso?next=%2Fadmin`. Os templates devem acrescentar `token_hash` e `type` nessa URL.
+
+### Template Invite user
+
+Use um link neste formato:
+
+```html
+<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=invite">
+  Definir minha senha
+</a>
+```
+
+### Template Reset password
+
+Use um link neste formato:
+
+```html
+<a href="{{ .RedirectTo }}&token_hash={{ .TokenHash }}&type=recovery">
+  Definir ou renovar minha senha
+</a>
+```
+
+## Modo provisório sem SMTP
+
+Enquanto o domínio institucional e o SMTP não estiverem disponíveis, o módulo
+`/admin/permissoes` pode funcionar sem envio de email.
+
+Nesse modo:
+
+1. o admin registra o email no formulário;
+2. o backend gera um link temporário com `auth.admin.generateLink()`;
+3. a interface mostra esse link para cópia manual;
+4. o link pode ser repassado por mensagem ao novo administrador.
+
+Esse modo evita o rate limit de email do provedor nativo do Supabase e permite
+validar o fluxo completo de primeiro acesso antes da infraestrutura final de
+email estar pronta.
 
 ## Expor schema para o app
 

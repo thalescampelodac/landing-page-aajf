@@ -5,7 +5,7 @@ export type AdminAccess =
   | { status: "unconfigured" }
   | { status: "unauthenticated" }
   | { status: "denied"; email?: string }
-  | { status: "authorized"; email?: string; role: string };
+  | { status: "authorized"; email?: string; profileId: string; role: string };
 
 export async function getAdminAccess(): Promise<AdminAccess> {
   if (!getSupabaseConfig()) {
@@ -35,6 +35,7 @@ export async function getAdminAccess(): Promise<AdminAccess> {
 
   return {
     email: user.email,
+    profileId: user.id,
     role: data.role,
     status: "authorized",
   };
