@@ -5,6 +5,7 @@ import {
   createAdminBootstrapGrant,
   grantAdminAccess,
   type AdminPermissionsActionState,
+  removeAdminUser,
   updateAdminBootstrapGrant,
   updateAdminMembership,
 } from "@/app/admin/permissoes/actions";
@@ -18,12 +19,18 @@ const initialState: AdminPermissionsActionState = {};
 
 type AdminPermissionsManagerProps = {
   bootstrapGrants: AdminBootstrapGrantRecord[];
+  currentAdminEmail?: string;
+  currentAdminProfileId: string;
+  currentAdminRole: string;
   eligibleProfiles: EligibleAdminProfileRecord[];
   memberships: AdminMembershipRecord[];
 };
 
 export function AdminPermissionsManager({
   bootstrapGrants,
+  currentAdminEmail,
+  currentAdminProfileId,
+  currentAdminRole,
   eligibleProfiles,
   memberships,
 }: AdminPermissionsManagerProps) {
@@ -52,7 +59,14 @@ export function AdminPermissionsManager({
           <div className="mt-6 grid gap-4">
             {memberships.length ? (
               memberships.map((membership) => (
-                <AdminMembershipRow key={membership.id} membership={membership} />
+                <AdminMembershipRow
+                  key={membership.id}
+                  canRemove={
+                    currentAdminRole === "super_admin" &&
+                    currentAdminProfileId !== membership.profile.id
+                  }
+                  membership={membership}
+                />
               ))
             ) : (
               <p className="text-sm leading-7 text-[var(--color-muted)]">
@@ -209,12 +223,18 @@ export function AdminPermissionsManager({
 }
 
 function AdminMembershipRow({
+  canRemove,
   membership,
 }: {
+  canRemove: boolean;
   membership: AdminMembershipRecord;
 }) {
   const [state, action, isPending] = useActionState(
     updateAdminMembership,
+    initialState,
+  );
+  const [removeState, removeAction, isRemoving] = useActionState(
+    removeAdminUser,
     initialState,
   );
 
@@ -266,11 +286,28 @@ function AdminMembershipRow({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+      <div className="mt-4 grid gap-3">
         <ActionFeedback state={state} />
-        <button className="secondary-button" disabled={isPending} type="submit">
-          {isPending ? "Atualizando..." : "Atualizar acesso"}
-        </button>
+        <ActionFeedback state={removeState} />
+      </div>
+
+      <div className="mt-4 flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+        <div />
+        <div className="flex flex-col gap-3 sm:flex-row">
+          {canRemove ? (
+              <button
+                className="rounded-full border border-[rgba(154,31,43,0.2)] bg-[rgba(154,31,43,0.08)] px-6 py-3 text-sm font-semibold text-[var(--color-red-deep)] transition hover:bg-[rgba(154,31,43,0.14)] disabled:cursor-not-allowed disabled:opacity-60"
+                disabled={isRemoving}
+                formAction={removeAction}
+                type="submit"
+              >
+                {isRemoving ? "Removendo..." : "Remover admin"}
+              </button>
+          ) : null}
+          <button className="secondary-button" disabled={isPending} type="submit">
+            {isPending ? "Atualizando..." : "Atualizar acesso"}
+          </button>
+        </div>
       </div>
     </form>
   );

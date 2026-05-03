@@ -27,6 +27,8 @@ export function AdminAccessPanel({
           {access.email ? (
             <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
               Conta conectada: {access.email}
+              {" · "}
+              Papel atual: {access.role}
             </p>
           ) : null}
           {children ? <div className="mt-10">{children}</div> : null}

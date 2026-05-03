@@ -135,6 +135,92 @@ export async function updateAdminMembership(
   return { success: "Permissão administrativa atualizada." };
 }
 
+export async function removeAdminUser(
+  _previousState: AdminPermissionsActionState,
+  formData: FormData,
+): Promise<AdminPermissionsActionState> {
+  const access = await getAdminAccess();
+
+  if (access.status !== "authorized" || access.role !== "super_admin") {
+    return { error: "Apenas super_admin pode remover usuários administrativos." };
+  }
+
+  const membershipId = String(formData.get("membershipId") || "").trim();
+
+  if (!membershipId) {
+    return { error: "Registro administrativo inválido." };
+  }
+
+  const supabase = await createClient();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+
+  if (!user) {
+    return { error: "Sessão indisponível para concluir a ação." };
+  }
+
+  const { data: targetMembership, error: targetMembershipError } = await supabase
+    .schema("aajf")
+    .from("admin_memberships")
+    .select("profile_id, profile:profiles!admin_memberships_profile_id_fkey(email)")
+    .eq("id", membershipId)
+    .maybeSingle();
+
+  if (targetMembershipError) {
+    return { error: targetMembershipError.message };
+  }
+
+  const targetProfile = Array.isArray(targetMembership?.profile)
+    ? targetMembership.profile[0]
+    : targetMembership?.profile;
+
+  if (!targetMembership?.profile_id || !targetProfile?.email) {
+    return { error: "Não foi possível localizar o usuário administrativo alvo." };
+  }
+
+  if (targetMembership.profile_id === user.id) {
+    return {
+      error:
+        "Por segurança, a conta atual não pode remover a própria conta administrativa por este módulo.",
+    };
+  }
+
+  const normalizedEmail = targetProfile.email.toLowerCase().trim();
+
+  const { error: grantsError } = await supabase
+    .schema("aajf")
+    .from("admin_bootstrap_grants")
+    .delete()
+    .eq("normalized_email", normalizedEmail);
+
+  if (grantsError) {
+    return { error: grantsError.message };
+  }
+
+  try {
+    const adminSupabase = createAdminClient();
+    const { error: deleteUserError } = await adminSupabase.auth.admin.deleteUser(
+      targetMembership.profile_id,
+    );
+
+    if (deleteUserError) {
+      return { error: deleteUserError.message };
+    }
+  } catch (adminClientError) {
+    return {
+      error:
+        adminClientError instanceof Error
+          ? adminClientError.message
+          : "Não foi possível remover o usuário administrativo.",
+    };
+  }
+
+  revalidatePath("/admin/permissoes");
+
+  return { success: "Usuário administrativo removido com sucesso." };
+}
+
 export async function createAdminBootstrapGrant(
   _previousState: AdminPermissionsActionState,
   formData: FormData,

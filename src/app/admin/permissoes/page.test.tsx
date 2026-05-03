@@ -41,6 +41,7 @@ describe("AdminPermissoesPage", () => {
     getAdminPermissionsDataMock.mockResolvedValue({
       access: {
         email: "admin@example.com",
+        profileId: "profile-admin",
         role: "super_admin",
         status: "authorized",
       },

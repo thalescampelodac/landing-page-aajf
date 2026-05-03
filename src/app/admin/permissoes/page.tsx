@@ -25,6 +25,9 @@ export default async function AdminPermissoesPage() {
       {authorizedData ? (
         <AdminPermissionsManager
           bootstrapGrants={authorizedData.bootstrapGrants}
+          currentAdminEmail={authorizedData.access.email}
+          currentAdminProfileId={authorizedData.access.profileId}
+          currentAdminRole={authorizedData.access.role}
           eligibleProfiles={authorizedData.eligibleProfiles}
           memberships={authorizedData.memberships}
         />
