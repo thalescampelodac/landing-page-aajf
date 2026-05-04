@@ -48,31 +48,44 @@ Este bloco deve reunir as informações principais da ficha cadastral.
 
 Sugestão inicial de campos:
 
+- foto (upload de imagem. aplicar todas as regras para que uma foto posso ser usada)
 - nome completo
 - email
-- telefone
-- documento principal
+- categoria: 
+    - Kleine Kinder
+    - Gosse Kinder
+    - Heimweh
+- CPF
+- RG
+- telefone (com DDD)
 - data de nascimento
-- endereço
+- naturalidade (lista de seleção para naturalidades. exemplo: brasileira, alemã, portuguesa, e assim por diante)
+- endereço (usar consulta por CEP para preenchimento automatico dos campos - CEP tbm é uma inforção que será guardada no banco de dados)
+- dependente (aqui será uma listagem de dependentes. deve sr um espação para incluir o primeiro dependente e adivionar tantos outros quanto necessario, entao tem que deixar aquela div com "+", sabe qual é?)
+    - nome completo
+    - categoria
+    - CPF
+    - RG
+    - data de nascimento
+    - naturalidade
+- observação
 
-Observação:
-
-Esta lista ainda precisa ser fechada com a definição da ficha cadastral real.
 
 ### 2. Situação do vínculo
 
 Este bloco deve exibir informações do relacionamento do usuário com a associação.
 
-Sugestão inicial:
+Deixar em algum lugar esse texto para ser lido:
 
-- status do associado
-- data de concessão
-- observações institucionais, se houver
+"Por meio deste instrumento, declaro me responsabilizar pela guarda e conservação do TRAJE FOLCLÓRICO do GRUPO DE DANÇAS FOLCLÓRICAS GERMÂNICAS SCHMETTERLING de propriedade da ASSOCIAÇÃO ALEMÃ DE JUIZ DE FORA/MG, inscrita no CNPJ 73.627.960/0001-50 pelo tempo que estiver associado a entidade e integrar o referido grupo. 
 
-Objetivo:
+Me comprometo a devolver o mencionado bem em perfeito estado de conservação, como atualmente se encontra.
 
-- deixar claro se o vínculo está ativo, inativo ou suspenso
-- evitar que o usuário dependa de atendimento para entender sua situação
+Em caso de extravio ou danos que provoquem a perda total ou parcial do bem, fico obrigado a ressarcir a Associação Alemã de Juiz de Fora/MG dos prejuízos ocasionados."
+
+E um check para ser marcado com o texto "Declaro ter lido e estar de pleno acordo com o termo acima descrito."
+
+eu não acredito que seja necessario exibir situação, uma vez que a unica situação atual possivel para que um associado veja ao entrar seja o de ativo. pela logica, se ele entrou entao ele é ativo.
 
 ### 3. Segurança da conta
 
@@ -82,12 +95,9 @@ Escopo inicial:
 
 - alteração de senha
 - informação sobre método de acesso atual
-
-Exemplos:
-
-- conta com login Google
-- conta com email e senha
-- conta com ambos os meios habilitados
+    - conta com login Google
+    - conta com email e senha
+    - conta com ambos os meios habilitados
 
 ### 4. Informações complementares
 
@@ -97,32 +107,36 @@ Este bloco pode ser usado depois para exibir:
 - dados adicionais do cadastro
 - conteúdos exclusivos do associado
 
-Por enquanto, ele pode nascer vazio ou como espaço reservado.
+Por enquanto, nascercomo espaço reservado.
 
 ## Edição de dados
 
-Precisamos separar claramente o que o associado poderá editar e o que será apenas leitura.
+somente os seguintes dados poderão ser editados pelo usuario:
 
-### Campos potencialmente editáveis pelo associado
-
-Sugestão inicial:
-
-- telefone
-- endereço
-- alguns dados complementares de contato
-
-### Campos que tendem a ser apenas leitura
-
-Sugestão inicial:
-
-- status do vínculo
-- papel/perfil institucional
-- data de concessão
-- informações sensíveis definidas pela administração
+- foto
+- nome completo
+- categoria: 
+    - Kleine Kinder
+    - Gosse Kinder
+    - Heimweh
+- CPF
+- RG
+- telefone (com DDD)
+- data de nascimento
+- naturalidade (lista de seleção para naturalidades. exemplo: brasileira, alemã, portuguesa, e assim por diante)
+- endereço (usar consulta por CEP para preenchimento automatico dos campos - CEP tbm é uma inforção que será guardada no banco de dados)
+- dependente (aqui será uma listagem de dependentes. deve sr um espação para incluir o primeiro dependente e adivionar tantos outros quanto necessario, entao tem que deixar aquela div com "+", e tambem disponibilizar uma forma de remover o dependente)
+    - nome completo
+    - categoria
+    - CPF
+    - RG
+    - data de nascimento
+    - naturalidade
+- observação
 
 ## Alteração de senha
 
-Já foi decidido que a área do associado deve conter um espaço para alteração de senha.
+Já foi decidido que a área do associado deve conter um espaço para alteração de senha em bloco separado com ação dedicada.
 
 Este bloco deve:
 
@@ -166,28 +180,10 @@ Separação recomendada:
 
 Isso significa que a modelagem dos dados deve ser compatível entre os dois módulos.
 
-## Dependências para implementação
-
-Antes da implementação completa da `#7`, ainda precisamos fechar:
-
-- quais campos compõem a ficha cadastral do associado
-- quais campos o associado pode editar
-- quais campos são apenas leitura
-- como o status será apresentado visualmente
-
-## Perguntas em aberto
-
-1. Quais campos exatos da ficha cadastral entram na área do associado?
-2. Quais desses campos o associado pode editar sozinho?
-3. A alteração de senha será feita inline na mesma página ou em bloco separado com ação dedicada?
-4. Devemos mostrar histórico ou apenas estado atual do vínculo?
-5. Haverá conteúdos exclusivos do associado além do cadastro?
-
 ## Critérios de aceite propostos
 
 - o associado autenticado e ativo consegue acessar sua área
 - a área exibe seus dados principais
-- a área mostra o status do vínculo
 - a área oferece alteração de senha
 - a interface separa claramente leitura e edição
 - o fluxo funciona bem em desktop e mobile
@@ -201,10 +197,19 @@ Este documento ainda não fecha:
 - histórico detalhado do vínculo
 - conteúdos editoriais exclusivos para associados
 
-## Próximo passo sugerido
+## Carteira visual na tela
 
-Antes da implementação visual completa, vale fazer um refinamento curto deste documento para fechar:
+- aparece dentro da área do associado
+- incluir os seguintes dados:
+    - foto se tiver
+    - nome completo
+    - categoria: 
+    - CPF
+    - data de nascimento
+    - naturalidade (lista de seleção para naturalidades. exemplo: brasileira, alemã, portuguesa, e assim por diante)
 
-- lista final dos campos
-- campos editáveis
-- blocos definitivos da página
+## Regras de negocio
+
+- um administrador pode e deve ser um associado
+- um associado pode ou nao ser um administrador
+- os acessos e controles de administrador e de um associado devem ser mantidos separadamente. um mesmo email deve ter seus acessos de associado e administrador separados.

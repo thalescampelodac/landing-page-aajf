@@ -1,43 +1,89 @@
 import { redirect } from "next/navigation";
 import { AdminAccessPanel } from "@/components/admin-access-panel";
-import { getAdminAccess } from "@/lib/supabase/access";
+import { AdminAssociatesManager } from "@/components/admin-associates-manager";
+import {
+  getAdminAssociatesData,
+  type AdminAssociatesData,
+} from "@/lib/supabase/admin-associates";
 
 export default async function AdminAssociadosPage() {
-  const access = await getAdminAccess();
+  const result = await loadAdminAssociatesResult();
+
+  if ("error" in result) {
+    return <AdminAssociatesLoadError error={result.error} />;
+  }
+
+  const { data } = result;
+  const { access } = data;
 
   if (access.status === "unauthenticated") {
     redirect("/entrar?next=/admin/associados");
   }
 
+  const authorizedData = isAuthorizedAdminAssociatesData(data) ? data : null;
+
   return (
     <AdminAccessPanel
       access={access}
-      authorizedDescription="Este módulo prepara a futura gestão de associados, concessão de acesso, leitura de status e vínculo com a área do associado."
-      authorizedTitle="Gestão de associados e status"
+      authorizedDescription="Este módulo agora concede vínculo de associado, permite revisar status e cria a ponte operacional com a área do associado e a ficha cadastral persistida."
+      authorizedTitle="Gestão de associados e ficha cadastral"
     >
-      <div className="grid gap-5 lg:grid-cols-2">
-        <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6">
-          <p className="section-eyebrow">Próximo passo</p>
-          <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Concessão de acesso
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-            O objetivo aqui é permitir que a administração conceda e revise o
-            acesso de associados com base no cadastro interno da associação.
-          </p>
-        </article>
-
-        <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6">
-          <p className="section-eyebrow">Próximo passo</p>
-          <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Status do vínculo
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-            A estrutura administrativa já reserva espaço para controlar estados
-            como ativo, inativo e suspenso antes da implementação final.
-          </p>
-        </article>
-      </div>
+      {authorizedData ? (
+        <AdminAssociatesManager
+          bootstrapGrants={authorizedData.bootstrapGrants}
+          memberships={authorizedData.memberships}
+        />
+      ) : null}
     </AdminAccessPanel>
+  );
+}
+
+function isAuthorizedAdminAssociatesData(
+  data: AdminAssociatesData,
+): data is Extract<AdminAssociatesData, { access: { status: "authorized" } }> {
+  return data.access.status === "authorized";
+}
+
+function getErrorMessage(error: unknown) {
+  if (error && typeof error === "object" && "message" in error) {
+    return String(error.message);
+  }
+
+  return "Nao foi possível carregar os dados administrativos de associados.";
+}
+
+async function loadAdminAssociatesResult() {
+  try {
+    const data = await getAdminAssociatesData();
+    return { data } as const;
+  } catch (error) {
+    return { error } as const;
+  }
+}
+
+function AdminAssociatesLoadError({ error }: { error: unknown }) {
+  return (
+    <section className="soft-card rounded-[2rem] p-8 sm:p-10 lg:p-12">
+      <p className="section-eyebrow">Gestão de associados</p>
+      <h1 className="section-title mt-4 max-w-3xl">
+        O módulo ainda não conseguiu acessar as tabelas novas da ficha cadastral.
+      </h1>
+      <p className="section-description mt-6 max-w-2xl">
+        Isso costuma acontecer quando a migration da `#8` ainda não foi aplicada
+        no Supabase ou quando as permissões/grants dessa migration ainda não
+        entraram em vigor no ambiente atual.
+      </p>
+
+      <div className="mt-8 rounded-[1.5rem] border border-[rgba(154,31,43,0.12)] bg-[rgba(255,250,243,0.74)] p-5">
+        <p className="text-sm font-medium text-[var(--color-red-deep)]">
+          {getErrorMessage(error)}
+        </p>
+        <p className="mt-3 text-sm leading-7 text-[var(--color-green-deep)]">
+          Verifique principalmente a migration
+          `20260503113000_associate_profiles.sql`, que cria `aajf.associate_profiles`
+          e `aajf.associate_dependents` com RLS e grants para `authenticated`.
+        </p>
+      </div>
+    </section>
   );
 }
