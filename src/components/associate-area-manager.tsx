@@ -199,7 +199,9 @@ export function AssociateAreaManager({
       return;
     }
 
-    if (!associatePhotoAcceptedMimeTypes.includes(file.type)) {
+    if (
+      !(associatePhotoAcceptedMimeTypes as readonly string[]).includes(file.type)
+    ) {
       setPhotoState({
         error: "Use uma imagem JPG, PNG ou WEBP para a foto do associado.",
       });

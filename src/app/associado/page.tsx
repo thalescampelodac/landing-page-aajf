@@ -1,31 +1,30 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 import { AssociateAreaManager } from "@/components/associate-area-manager";
-import {
-  getAssociateAreaData,
-  type AssociateAreaData,
-} from "@/lib/supabase/associate-profile";
+import type { AssociateAreaData } from "@/lib/supabase/associate-profile-shared";
+import { getAssociateAreaData } from "@/lib/supabase/associate-profile";
 
 export default async function AssociadoPage() {
   const data = await getAssociateAreaData();
-  const { access } = data;
 
-  if (access.status === "unauthenticated") {
+  if (data.access.status === "unauthenticated") {
     redirect("/entrar?next=/associado");
   }
 
-  const authorizedData = isAuthorizedAssociateAreaData(data) ? data : null;
+  if (isAuthorizedAssociateAreaData(data)) {
+    return (
+      <main className="section-shell flex-1 pb-16 pt-8">
+        <AssociateAreaManager
+          authMethods={data.authMethods}
+          profile={data.profile}
+        />
+      </main>
+    );
+  }
 
   return (
     <main className="section-shell flex-1 pb-16 pt-8">
-      {authorizedData ? (
-        <AssociateAreaManager
-          authMethods={authorizedData.authMethods}
-          profile={authorizedData.profile}
-        />
-      ) : (
-        <AssociateAccessFallback access={access} />
-      )}
+      <AssociateAccessFallback access={data.access} />
     </main>
   );
 }

@@ -75,7 +75,7 @@ export async function grantAssociateAccess(
         manualLink: buildManualFirstAccessLink(
           siteUrl,
           inviteData.properties.hashed_token,
-          inviteData.properties.verification_type,
+          "invite",
           next,
         ),
         manualLinkLabel: "Link provisório de primeiro acesso do associado",
@@ -112,7 +112,7 @@ export async function grantAssociateAccess(
       manualLink: buildManualFirstAccessLink(
         siteUrl,
         recoveryData.properties.hashed_token,
-        recoveryData.properties.verification_type,
+        "recovery",
         next,
       ),
       manualLinkLabel: "Link provisório para liberar o acesso do associado",

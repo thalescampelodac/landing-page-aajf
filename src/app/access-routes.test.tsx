@@ -3,11 +3,8 @@ import { vi } from "vitest";
 import ApoiadorPage from "@/app/apoiador/page";
 import AssociadoPage from "@/app/associado/page";
 
-vi.mock("@/lib/supabase/associate-profile", async (importOriginal) => {
-  const actual = await importOriginal<typeof import("@/lib/supabase/associate-profile")>();
-
+vi.mock("@/lib/supabase/associate-profile", async () => {
   return {
-    ...actual,
     getAssociateAreaData: vi.fn(async () => ({
       access: {
         email: "associado@example.com",
@@ -48,15 +45,13 @@ describe("placeholder routes", () => {
   it("renderiza a area do associado", async () => {
     render(await AssociadoPage());
     expect(
-      screen.getByRole("heading", {
-        name: /Sua área pessoal para acompanhar o vínculo com a associação/i,
-      }),
+      screen.getByText(/^Dados do Associado$/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("heading", { name: /Senha e método de acesso/i }),
     ).toBeInTheDocument();
     expect(
-      screen.getByRole("heading", { name: /Carteira do Associado/i }),
+      screen.getByRole("button", { name: /Visualizar carteirinha/i }),
     ).toBeInTheDocument();
   });
 

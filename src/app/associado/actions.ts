@@ -158,7 +158,10 @@ export async function saveAssociateProfile(
     return { error: "Selecione uma naturalidade válida para o associado." };
   }
 
-  if (photoFile && !associatePhotoAcceptedMimeTypes.includes(photoFile.type)) {
+  if (
+    photoFile &&
+    !(associatePhotoAcceptedMimeTypes as readonly string[]).includes(photoFile.type)
+  ) {
     return { error: "Use uma imagem JPG, PNG ou WEBP para a foto do associado." };
   }
 
