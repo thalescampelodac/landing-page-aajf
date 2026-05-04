@@ -1,6 +1,6 @@
 "use client";
 
-import { useActionState, useDeferredValue, useEffect, useState } from "react";
+import { useActionState, useDeferredValue, useState } from "react";
 import {
   grantAssociateAccess,
   updateAssociateMembership,
@@ -58,12 +58,6 @@ export function AdminAssociatesManager({
     (currentPage - 1) * PAGE_SIZE,
     currentPage * PAGE_SIZE,
   );
-
-  useEffect(() => {
-    if (page !== currentPage) {
-      setPage(currentPage);
-    }
-  }, [currentPage, page]);
 
   return (
     <div className="grid gap-6">

@@ -65,7 +65,6 @@ type CepLookupState =
   | { status: "error"; message: string };
 
 type AssociateAreaManagerProps = {
-  accessEmail?: string;
   authMethods: AssociateAuthMethods;
   profile: AssociateProfileRecord;
 };
@@ -79,7 +78,6 @@ Me comprometo a devolver o mencionado bem em perfeito estado de conservação, c
 Em caso de extravio ou danos que provoquem a perda total ou parcial do bem, fico obrigado a ressarcir a Associação Alemã de Juiz de Fora/MG dos prejuízos ocasionados.`;
 
 export function AssociateAreaManager({
-  accessEmail,
   authMethods,
   profile,
 }: AssociateAreaManagerProps) {
@@ -95,6 +93,9 @@ export function AssociateAreaManager({
   const [photoObjectUrl, setPhotoObjectUrl] = useState<string | null>(null);
   const [photoState, setPhotoState] = useState<PhotoState>({});
   const [isSavingPassword, setIsSavingPassword] = useState(false);
+  const [isCardModalOpen, setIsCardModalOpen] = useState(false);
+  const [cardPreviewUrl, setCardPreviewUrl] = useState<string | null>(null);
+  const [isGeneratingCardPreview, setIsGeneratingCardPreview] = useState(false);
   const [cepLookupState, setCepLookupState] = useState<CepLookupState>({
     status: "idle",
   });
@@ -125,6 +126,24 @@ export function AssociateAreaManager({
     value: AssociateDraft[K],
   ) {
     setDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  async function handleOpenCardModal() {
+    setIsGeneratingCardPreview(true);
+
+    const previewUrl = await createAssociateCardPngDataUrl({
+      birthDate: formatDate(draft.birthDate),
+      category: draft.category || "Não informada",
+      cpf: draft.cpf || "Não informado",
+      fullName: draft.fullName || "Nome em atualização",
+      nationality: draft.nationality || "Não informada",
+      photoUrl: draft.photoUrl,
+      profileId: profile.profileId,
+    });
+
+    setCardPreviewUrl(previewUrl);
+    setIsGeneratingCardPreview(false);
+    setIsCardModalOpen(true);
   }
 
   function handleCepChange(value: string) {
@@ -328,16 +347,14 @@ export function AssociateAreaManager({
             <p className="section-eyebrow text-[0.88rem]">
               Dados do Associado
             </p>
-            <div className="mt-4 flex justify-end">
-              <AssociateMiniCard
-                category={draft.category || "Não informada"}
-                cpf={draft.cpf || "Não informado"}
-                fullName={draft.fullName || "Nome em atualização"}
-                nationality={draft.nationality || "Não informada"}
-                photoUrl={draft.photoUrl}
-                profileId={profile.profileId}
-                birthDate={formatDate(draft.birthDate)}
-              />
+            <div className="-mt-8 flex justify-end">
+              <button
+                className="secondary-button"
+                onClick={handleOpenCardModal}
+                type="button"
+              >
+                {isGeneratingCardPreview ? "Gerando prévia..." : "Visualizar carteirinha"}
+              </button>
             </div>
 
             <div className="mt-6 grid gap-6">
@@ -831,36 +848,68 @@ export function AssociateAreaManager({
           </article>
         </section>
       </section>
+
+      {isCardModalOpen ? (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-[rgba(15,23,20,0.62)] px-4 py-6">
+          <div className="relative w-full max-w-[54rem] rounded-[2rem] border border-white/60 bg-[rgba(255,250,243,0.96)] p-6 shadow-[0_24px_80px_rgba(9,28,22,0.28)] backdrop-blur">
+            <button
+              aria-label="Fechar prévia da carteirinha"
+              className="absolute right-4 top-4 grid h-10 w-10 place-items-center rounded-full border border-[rgba(23,54,45,0.12)] bg-white text-lg text-[var(--color-green-deep)] transition hover:bg-[rgba(255,250,243,0.92)]"
+              onClick={() => setIsCardModalOpen(false)}
+              type="button"
+            >
+              ×
+            </button>
+
+            <div className="flex justify-center">
+              {cardPreviewUrl ? (
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  alt={`Prévia da carteirinha de ${draft.fullName || "associado"}`}
+                  className="h-auto w-full max-w-[46rem] rounded-[1.25rem] shadow-[0_18px_48px_rgba(16,46,37,0.18)]"
+                  src={cardPreviewUrl}
+                />
+              ) : (
+                <div className="grid min-h-[18rem] w-full max-w-[46rem] place-items-center rounded-[1.25rem] border border-[rgba(23,54,45,0.12)] bg-[rgba(255,250,243,0.72)] text-sm text-[var(--color-muted)]">
+                  Não foi possível gerar a prévia da carteirinha.
+                </div>
+              )}
+            </div>
+
+            <div className="mt-8 flex flex-col gap-3 sm:flex-row sm:justify-end">
+              <button
+                className="secondary-button"
+                onClick={() => setIsCardModalOpen(false)}
+                type="button"
+              >
+                Fechar
+              </button>
+              <button
+                className="primary-button"
+                onClick={() =>
+                  downloadAssociateCardPng({
+                    birthDate: formatDate(draft.birthDate),
+                    category: draft.category || "Não informada",
+                    cpf: draft.cpf || "Não informado",
+                    fullName: draft.fullName || "Nome em atualização",
+                    nationality: draft.nationality || "Não informada",
+                    photoUrl: draft.photoUrl,
+                    profileId: profile.profileId,
+                  })
+                }
+                type="button"
+              >
+                Baixar carteirinha em PNG
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 }
 
-function CardDataBox({
-  label,
-  value,
-  wide,
-}: {
-  label: string;
-  value: string;
-  wide?: boolean;
-}) {
-  return (
-    <div
-      className={`border-b border-[rgba(23,59,47,0.16)] px-0 pb-3 pt-3 ${
-        wide ? "sm:col-span-2 xl:col-span-2" : ""
-      }`}
-    >
-      <p className="text-[0.64rem] font-black uppercase tracking-[0.22em] text-[var(--color-muted)]">
-        {label}
-      </p>
-      <p className="mt-2 text-[0.98rem] font-extrabold leading-6 text-[var(--color-green-deep)]">
-        {value}
-      </p>
-    </div>
-  );
-}
-
-function AssociateMiniCard({
+async function downloadAssociateCardPng({
   birthDate,
   category,
   cpf,
@@ -877,233 +926,160 @@ function AssociateMiniCard({
   photoUrl: string | null;
   profileId: string;
 }) {
-  async function handleDownloadCard() {
-    const canvas = document.createElement("canvas");
-    const width = 760;
-    const height = 480;
-    canvas.width = width;
-    canvas.height = height;
+  const dataUrl = await createAssociateCardPngDataUrl({
+    birthDate,
+    category,
+    cpf,
+    fullName,
+    nationality,
+    photoUrl,
+    profileId,
+  });
 
-    const context = canvas.getContext("2d");
-
-    if (!context) {
-      return;
-    }
-
-    context.fillStyle = "#efe1c9";
-    context.fillRect(0, 0, width, height);
-
-    drawRoundedRect(context, 14, 14, width - 28, height - 28, 34);
-
-    const gradient = context.createLinearGradient(0, 0, width, height);
-    gradient.addColorStop(0, "#fffaf2");
-    gradient.addColorStop(1, "#f8efe1");
-    context.fillStyle = gradient;
-    context.fill();
-
-    context.save();
-    drawRoundedRect(context, 14, 14, width - 28, height - 28, 34);
-    context.clip();
-    context.fillStyle = "#173b2f";
-    context.fillRect(14, 14, 258, height - 28);
-    context.restore();
-
-    context.strokeStyle = "rgba(23,59,47,0.12)";
-    context.lineWidth = 1;
-    drawRoundedRect(context, 24, 24, width - 48, height - 48, 26);
-    context.stroke();
-
-    context.fillStyle = "rgba(255,247,237,0.96)";
-    context.beginPath();
-    context.arc(83, 90, 34, 0, Math.PI * 2);
-    context.fill();
-
-    context.fillStyle = "#173b2f";
-    context.font = '700 30px "Cormorant Garamond", Georgia, serif';
-    context.textAlign = "center";
-    context.fillText("AAJF", 83, 99);
-
-    context.textAlign = "left";
-    context.fillStyle = "rgba(255,247,237,0.84)";
-    context.font = '700 12px "Geist", system-ui, sans-serif';
-    drawMultilineText(
-      context,
-      "ASSOCIAÇÃO CULTURAL E RECREATIVA BRASIL-ALEMANHA",
-      48,
-      156,
-      165,
-      18,
-    );
-
-    drawMiniQr(context, 48, 330, 84);
-    context.fillStyle = "rgba(255,247,237,0.74)";
-    context.font = '500 11px "Geist", system-ui, sans-serif';
-    drawMultilineText(
-      context,
-      "Documento digital de identificação do associado.",
-      48,
-      430,
-      160,
-      16,
-    );
-
-    context.fillStyle = "#d8b45f";
-    context.font = '800 12px "Geist", system-ui, sans-serif';
-    context.fillText("CARTEIRA DO ASSOCIADO", 316, 72);
-
-    context.fillStyle = "#5f7268";
-    context.font = '800 12px "Geist", system-ui, sans-serif';
-    context.fillText("ASSOCIADO", 316, 114);
-
-    context.textAlign = "right";
-    context.fillText(formatAssociateCardId(profileId), 704, 72);
-    context.textAlign = "left";
-
-    context.fillStyle = "#173b2f";
-    context.font = '400 68px "Cormorant Garamond", Georgia, serif';
-    drawMultilineText(context, fullName, 316, 182, 290, 66);
-
-    await drawPhotoBlock(context, photoUrl, 610, 92, 130, 160);
-
-    drawCardField(context, "Categoria", category, 316, 288, 150);
-    drawCardField(context, "CPF", cpf, 478, 288, 126);
-    drawCardField(context, "Nascimento", birthDate, 622, 288, 82);
-    drawCardField(context, "Naturalidade", nationality, 316, 370, 288);
-    drawCardField(context, "Validade", "31/12/2026", 622, 370, 82);
-
-    context.strokeStyle = "rgba(23,59,47,0.22)";
-    context.setLineDash([4, 5]);
-    context.beginPath();
-    context.moveTo(316, 408);
-    context.lineTo(704, 408);
-    context.stroke();
-    context.setLineDash([]);
-
-    drawStatusPill(context, 316, 430, "Associado ativo");
-
-    context.fillStyle = "#5f7268";
-    context.font = '500 11px "Geist", system-ui, sans-serif';
-    context.textAlign = "right";
-    drawMultilineText(
-      context,
-      "Uso interno da Associação Alemã de Juiz de Fora. Validação mediante QR Code.",
-      704,
-      438,
-      180,
-      16,
-      "right",
-    );
-
-    const downloadLink = document.createElement("a");
-    downloadLink.href = canvas.toDataURL("image/png");
-    downloadLink.download = `${slugifyFileName(fullName || "associado")}-carteirinha.png`;
-    downloadLink.click();
+  if (!dataUrl) {
+    return;
   }
 
-  return (
-    <button
-      className="group block w-[18rem] cursor-pointer rounded-[1rem] bg-transparent text-left transition-transform hover:-translate-y-1"
-      onClick={handleDownloadCard}
-      title="Clique para baixar a carteirinha em PNG"
-      type="button"
-    >
-      <article className="relative w-[18rem] overflow-hidden rounded-[1rem] border border-white/85 bg-[linear-gradient(135deg,#fffaf2,var(--color-paper))] shadow-[0_14px_32px_rgba(16,46,37,0.14)]">
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(115deg,rgba(255,255,255,0.42),transparent_30%)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(90deg,var(--color-green-deep)_0_34%,transparent_34%),radial-gradient(circle_at_88%_90%,rgba(185,28,28,0.12),transparent_30%),radial-gradient(circle_at_55%_0%,rgba(216,180,95,0.14),transparent_34%)]" />
-      <div className="pointer-events-none absolute inset-[4px] rounded-[0.8rem] border border-[rgba(23,59,47,0.12)]" />
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(118deg,transparent_0_38%,rgba(255,255,255,0.32)_47%,transparent_58%)] opacity-50" />
-
-      <div className="relative z-[1] grid aspect-[1.586/1] grid-cols-[4.2rem_minmax(0,1fr)]">
-        <aside className="flex flex-col justify-between px-2.5 py-2.5 text-[var(--color-paper)]">
-          <div>
-            <div className="grid h-6 w-6 place-items-center rounded-full bg-[rgba(255,247,237,0.96)] text-[0.48rem] font-bold text-[var(--color-green-deep)]">
-              <span className="font-heading">AAJF</span>
-            </div>
-            <p className="mt-2 text-[0.28rem] uppercase tracking-[0.14em] text-[rgba(255,247,237,0.82)]">
-              Associação Cultural e Recreativa Brasil-Alemanha
-            </p>
-          </div>
-
-          <div>
-            <div className="grid h-5 w-5 place-items-center rounded-[0.35rem] border-[3px] border-[var(--color-paper)] bg-[linear-gradient(90deg,var(--color-green-deep)_3px,transparent_3px)_0_0/6px_6px,linear-gradient(var(--color-green-deep)_3px,transparent_3px)_0_0/6px_6px,#fff7ed]" />
-            <p className="mt-2 text-[0.28rem] leading-[1.25] text-[rgba(255,247,237,0.74)]">
-              Documento digital do associado.
-            </p>
-          </div>
-        </aside>
-
-        <section className="flex flex-col justify-between px-2.5 py-2.5">
-          <div>
-            <header className="flex items-start justify-between gap-2">
-              <p className="text-[0.28rem] font-extrabold uppercase tracking-[0.18em] text-[var(--color-gold-strong)]">
-                Carteira do Associado
-              </p>
-              <span className="whitespace-nowrap text-[0.3rem] font-extrabold tracking-[0.08em] text-[var(--color-muted)]">
-                {formatAssociateCardId(profileId)}
-              </span>
-            </header>
-
-            <div className="mt-1.5 flex items-start justify-between gap-2">
-              <div>
-                <p className="mb-1 text-[0.3rem] font-extrabold uppercase tracking-[0.14em] text-[var(--color-muted)]">
-                  Associado
-                </p>
-                <h3 className="max-w-[6.5rem] font-heading text-[1.08rem] leading-[0.92] tracking-[-0.04em] text-[var(--color-green-deep)]">
-                  {fullName}
-                </h3>
-              </div>
-
-              <div className="grid h-11 w-9 flex-none place-items-center overflow-hidden rounded-[0.6rem] border border-[rgba(23,59,47,0.18)] bg-[linear-gradient(135deg,#e8dfd1,#fffaf2)] shadow-[0_8px_18px_rgba(23,59,47,0.1),inset_0_0_0_2px_rgba(255,255,255,0.7)]">
-                {photoUrl ? (
-                  // eslint-disable-next-line @next/next/no-img-element
-                  <img
-                    alt={`Foto de ${fullName}`}
-                    className="h-full w-full object-cover"
-                    src={photoUrl}
-                  />
-                ) : (
-                  <div className="px-1 text-center text-[0.24rem] font-black uppercase tracking-[0.08em] text-[var(--color-muted)]">
-                    Sem foto
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <section className="mt-2.5 grid grid-cols-2 gap-x-2 gap-y-1.5">
-              <MiniCardDataBox label="Categoria" value={category} />
-              <MiniCardDataBox label="CPF" value={cpf} />
-              <MiniCardDataBox label="Nascimento" value={birthDate} />
-              <MiniCardDataBox label="Naturalidade" value={nationality} />
-            </section>
-          </div>
-
-          <footer className="mt-2 flex items-end justify-between gap-2 border-t border-dashed border-[rgba(23,59,47,0.16)] pt-1.5">
-            <div className="inline-flex items-center gap-1 rounded-full border border-[rgba(23,59,47,0.12)] bg-[rgba(23,59,47,0.08)] px-1.5 py-0.5 text-[0.28rem] font-black text-[var(--color-green-deep)]">
-              <span className="h-1 w-1 rounded-full bg-[#22c55e] shadow-[0_0_8px_rgba(34,197,94,0.85)]" />
-              Ativo
-            </div>
-            <p className="max-w-[4.25rem] text-right text-[0.24rem] leading-[1.2] text-[var(--color-muted)]">
-              Uso interno da AAJF.
-            </p>
-          </footer>
-        </section>
-      </div>
-      </article>
-    </button>
-  );
+  const downloadLink = document.createElement("a");
+  downloadLink.href = dataUrl;
+  downloadLink.download = `${slugifyFileName(fullName || "associado")}-carteirinha.png`;
+  downloadLink.click();
 }
 
-function MiniCardDataBox({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="border-b border-[rgba(23,59,47,0.12)] pb-1">
-      <p className="text-[0.22rem] font-black uppercase tracking-[0.12em] text-[var(--color-muted)]">
-        {label}
-      </p>
-      <p className="mt-0.5 text-[0.34rem] font-extrabold leading-[1.25] text-[var(--color-green-deep)]">
-        {value}
-      </p>
-    </div>
+async function createAssociateCardPngDataUrl({
+  birthDate,
+  category,
+  cpf,
+  fullName,
+  nationality,
+  photoUrl,
+  profileId,
+}: {
+  birthDate: string;
+  category: string;
+  cpf: string;
+  fullName: string;
+  nationality: string;
+  photoUrl: string | null;
+  profileId: string;
+}) {
+  const canvas = document.createElement("canvas");
+  const width = 760;
+  const height = 480;
+  canvas.width = width;
+  canvas.height = height;
+
+  const context = canvas.getContext("2d");
+
+  if (!context) {
+    return null;
+  }
+
+  context.fillStyle = "#efe1c9";
+  context.fillRect(0, 0, width, height);
+
+  drawRoundedRect(context, 14, 14, width - 28, height - 28, 34);
+
+  const gradient = context.createLinearGradient(0, 0, width, height);
+  gradient.addColorStop(0, "#fffaf2");
+  gradient.addColorStop(1, "#f8efe1");
+  context.fillStyle = gradient;
+  context.fill();
+
+  context.save();
+  drawRoundedRect(context, 14, 14, width - 28, height - 28, 34);
+  context.clip();
+  context.fillStyle = "#173b2f";
+  context.fillRect(14, 14, 258, height - 28);
+  context.restore();
+
+  context.strokeStyle = "rgba(23,59,47,0.12)";
+  context.lineWidth = 1;
+  drawRoundedRect(context, 24, 24, width - 48, height - 48, 26);
+  context.stroke();
+
+  context.fillStyle = "rgba(255,247,237,0.96)";
+  context.beginPath();
+  context.arc(83, 90, 34, 0, Math.PI * 2);
+  context.fill();
+
+  context.fillStyle = "#173b2f";
+  context.font = '700 30px "Cormorant Garamond", Georgia, serif';
+  context.textAlign = "center";
+  context.fillText("AAJF", 83, 99);
+
+  context.textAlign = "left";
+  context.fillStyle = "rgba(255,247,237,0.84)";
+  context.font = '700 12px "Geist", system-ui, sans-serif';
+  drawMultilineText(
+    context,
+    "ASSOCIAÇÃO CULTURAL E RECREATIVA BRASIL-ALEMANHA",
+    48,
+    156,
+    165,
+    18,
   );
+
+  drawMiniQr(context, 48, 330, 84);
+  context.fillStyle = "rgba(255,247,237,0.74)";
+  context.font = '500 11px "Geist", system-ui, sans-serif';
+  drawMultilineText(
+    context,
+    "Documento digital de identificação do associado.",
+    48,
+    430,
+    160,
+    16,
+  );
+
+  context.fillStyle = "#d8b45f";
+  context.font = '800 12px "Geist", system-ui, sans-serif';
+  context.fillText("CARTEIRA DO ASSOCIADO", 316, 72);
+
+  context.fillStyle = "#5f7268";
+  context.font = '800 12px "Geist", system-ui, sans-serif';
+  context.fillText("ASSOCIADO", 316, 114);
+
+  context.textAlign = "right";
+  context.fillText(formatAssociateCardId(profileId), 704, 72);
+  context.textAlign = "left";
+
+  context.fillStyle = "#173b2f";
+  context.font = '400 68px "Cormorant Garamond", Georgia, serif';
+  drawMultilineText(context, fullName, 316, 182, 290, 66);
+
+  await drawPhotoBlock(context, photoUrl, 610, 92, 130, 160);
+
+  drawCardField(context, "Categoria", category, 316, 288, 150);
+  drawCardField(context, "CPF", cpf, 478, 288, 126);
+  drawCardField(context, "Nascimento", birthDate, 622, 288, 82);
+  drawCardField(context, "Naturalidade", nationality, 316, 370, 288);
+  drawCardField(context, "Validade", "31/12/2026", 622, 370, 82);
+
+  context.strokeStyle = "rgba(23,59,47,0.22)";
+  context.setLineDash([4, 5]);
+  context.beginPath();
+  context.moveTo(316, 408);
+  context.lineTo(704, 408);
+  context.stroke();
+  context.setLineDash([]);
+
+  drawStatusPill(context, 316, 430, "Associado ativo");
+
+  context.fillStyle = "#5f7268";
+  context.font = '500 11px "Geist", system-ui, sans-serif';
+  context.textAlign = "right";
+  drawMultilineText(
+    context,
+    "Uso interno da Associação Alemã de Juiz de Fora. Validação mediante QR Code.",
+    704,
+    438,
+    180,
+    16,
+    "right",
+  );
+
+  return canvas.toDataURL("image/png");
 }
 
 async function drawPhotoBlock(

@@ -6,7 +6,6 @@ import type {
   AssociateAreaData,
   AssociateAuthMethods,
   AssociateDependentRecord,
-  AssociateProfileRecord,
 } from "@/lib/supabase/associate-profile-shared";
 import { createClient } from "@/lib/supabase/server";
 

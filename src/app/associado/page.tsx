@@ -20,7 +20,6 @@ export default async function AssociadoPage() {
     <main className="section-shell flex-1 pb-16 pt-8">
       {authorizedData ? (
         <AssociateAreaManager
-          accessEmail={authorizedData.access.email}
           authMethods={authorizedData.authMethods}
           profile={authorizedData.profile}
         />

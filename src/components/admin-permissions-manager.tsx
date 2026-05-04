@@ -19,7 +19,6 @@ const initialState: AdminPermissionsActionState = {};
 
 type AdminPermissionsManagerProps = {
   bootstrapGrants: AdminBootstrapGrantRecord[];
-  currentAdminEmail?: string;
   currentAdminProfileId: string;
   currentAdminRole: string;
   eligibleProfiles: EligibleAdminProfileRecord[];
@@ -28,7 +27,6 @@ type AdminPermissionsManagerProps = {
 
 export function AdminPermissionsManager({
   bootstrapGrants,
-  currentAdminEmail,
   currentAdminProfileId,
   currentAdminRole,
   eligibleProfiles,
