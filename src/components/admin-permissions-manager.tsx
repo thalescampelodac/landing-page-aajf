@@ -3,7 +3,6 @@
 import { useActionState } from "react";
 import {
   createAdminBootstrapGrant,
-  grantAdminAccess,
   type AdminPermissionsActionState,
   removeAdminUser,
   updateAdminBootstrapGrant,
@@ -12,7 +11,6 @@ import {
 import type {
   AdminBootstrapGrantRecord,
   AdminMembershipRecord,
-  EligibleAdminProfileRecord,
 } from "@/lib/supabase/admin-permissions";
 
 const initialState: AdminPermissionsActionState = {};
@@ -21,7 +19,6 @@ type AdminPermissionsManagerProps = {
   bootstrapGrants: AdminBootstrapGrantRecord[];
   currentAdminProfileId: string;
   currentAdminRole: string;
-  eligibleProfiles: EligibleAdminProfileRecord[];
   memberships: AdminMembershipRecord[];
 };
 
@@ -29,13 +26,8 @@ export function AdminPermissionsManager({
   bootstrapGrants,
   currentAdminProfileId,
   currentAdminRole,
-  eligibleProfiles,
   memberships,
 }: AdminPermissionsManagerProps) {
-  const [grantAccessState, grantAccessAction, isGrantingAccess] = useActionState(
-    grantAdminAccess,
-    initialState,
-  );
   const [bootstrapState, bootstrapAction, isCreatingBootstrap] = useActionState(
     createAdminBootstrapGrant,
     initialState,
@@ -43,7 +35,7 @@ export function AdminPermissionsManager({
 
   return (
     <div className="grid gap-6">
-      <section className="grid gap-5 xl:grid-cols-[minmax(0,1.15fr)_minmax(20rem,0.85fr)]">
+      <section className="grid gap-5">
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6">
           <p className="section-eyebrow">Acessos atuais</p>
           <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
@@ -73,72 +65,6 @@ export function AdminPermissionsManager({
             )}
           </div>
         </article>
-
-        <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-[rgba(255,248,239,0.82)] p-6">
-          <p className="section-eyebrow">Promover perfil existente</p>
-          <h3 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-            Conceder acesso a quem já entrou no sistema
-          </h3>
-          <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-            Use este fluxo quando a pessoa já entrou no sistema e já possui
-            perfil em `aajf.profiles`. Para novos administradores que ainda não
-            entraram, use o convite por email no bloco ao lado.
-          </p>
-
-          <form action={grantAccessAction} className="mt-6 grid gap-4">
-            <label className="form-field">
-              <span>Perfil existente</span>
-              <select
-                className="rounded-2xl border border-[rgba(23,54,45,0.12)] bg-white/88 px-4 py-3 text-[var(--color-ink)]"
-                defaultValue=""
-                name="profileId"
-              >
-                <option value="" disabled>
-                  Selecione um perfil
-                </option>
-                {eligibleProfiles.map((profile) => (
-                  <option key={profile.id} value={profile.id}>
-                    {profile.fullName ? `${profile.fullName} - ` : ""}
-                    {profile.email}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <div className="grid gap-4 sm:grid-cols-2">
-              <label className="form-field">
-                <span>Papel</span>
-                <select
-                  className="rounded-2xl border border-[rgba(23,54,45,0.12)] bg-white/88 px-4 py-3 text-[var(--color-ink)]"
-                  defaultValue="admin"
-                  name="role"
-                >
-                  <option value="admin">admin</option>
-                  <option value="super_admin">super_admin</option>
-                </select>
-              </label>
-
-              <label className="form-field">
-                <span>Status</span>
-                <select
-                  className="rounded-2xl border border-[rgba(23,54,45,0.12)] bg-white/88 px-4 py-3 text-[var(--color-ink)]"
-                  defaultValue="active"
-                  name="status"
-                >
-                  <option value="active">active</option>
-                  <option value="inactive">inactive</option>
-                  <option value="suspended">suspended</option>
-                </select>
-              </label>
-            </div>
-
-            <ActionFeedback state={grantAccessState} />
-
-            <button className="primary-button" disabled={isGrantingAccess} type="submit">
-              {isGrantingAccess ? "Salvando..." : "Conceder acesso"}
-            </button>
-          </form>
-        </article>
       </section>
 
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
@@ -148,8 +74,8 @@ export function AdminPermissionsManager({
             Quem vai receber o primeiro acesso por email
           </h3>
           <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-            Esta lista usa `admin_bootstrap_grants` para preparar autorização
-            antecipada e registrar quem ainda deve concluir o primeiro acesso.
+            Esta lista mostra quem já foi autorizado a entrar na administração,
+            mas ainda precisa concluir o primeiro acesso.
           </p>
 
           <div className="mt-6 grid gap-4">

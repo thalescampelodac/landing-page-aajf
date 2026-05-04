@@ -21,9 +21,11 @@ export function AdminAccessPanel({
         <>
           <p className="section-eyebrow">Módulo Administrativo</p>
           <h2 className="section-title mt-4 max-w-3xl">{authorizedTitle}</h2>
-          <p className="section-description mt-6 max-w-2xl">
-            {authorizedDescription}
-          </p>
+          {authorizedDescription ? (
+            <p className="section-description mt-6 max-w-2xl">
+              {authorizedDescription}
+            </p>
+          ) : null}
           {access.email ? (
             <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
               Conta conectada: {access.email}

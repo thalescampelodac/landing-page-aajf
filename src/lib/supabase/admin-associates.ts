@@ -1,6 +1,16 @@
 import { getAdminAccess, type AdminAccess } from "@/lib/supabase/access";
-import type { AssociateCategory } from "@/lib/supabase/associate-profile-shared";
+import type {
+  AssociateCategory,
+  AssociateDependentRecord,
+  AssociateProfileRecord,
+  Nationality,
+} from "@/lib/supabase/associate-profile-shared";
 import { createClient } from "@/lib/supabase/server";
+
+type AdminAssociateProfileSnapshot = Omit<
+  AssociateProfileRecord,
+  "email" | "profileId"
+>;
 
 export type AdminAssociateMembershipRecord = {
   grantedAt: string;
@@ -11,10 +21,7 @@ export type AdminAssociateMembershipRecord = {
     fullName: string | null;
     id: string;
   };
-  profileSnapshot: {
-    category: AssociateCategory | null;
-    phone: string | null;
-  } | null;
+  profileSnapshot: AdminAssociateProfileSnapshot | null;
   status: "active" | "inactive" | "suspended";
 };
 
@@ -45,8 +52,8 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
   const supabase = await createClient();
   const [
     { data: membershipsData, error: membershipsError },
-    { data: grantsData, error: grantsError },
     { data: associateProfilesData, error: associateProfilesError },
+    { data: associateDependentsData, error: associateDependentsError },
   ] =
     await Promise.all([
       supabase
@@ -58,29 +65,70 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
         .order("granted_at", { ascending: false }),
       supabase
         .schema("aajf")
-        .from("associate_bootstrap_grants")
-        .select("id, email, status, membership_status, claimed_at, notes")
-        .order("created_at", { ascending: false }),
+        .from("associate_profiles")
+        .select(
+          "id, profile_id, full_name, category, cpf, rg, phone, birth_date, nationality, cep, street, number, complement, neighborhood, city, state, observation, term_accepted, photo_url",
+        ),
       supabase
         .schema("aajf")
-        .from("associate_profiles")
-        .select("profile_id, category, phone"),
+        .from("associate_dependents")
+        .select(
+          "id, associate_profile_id, full_name, category, cpf, rg, birth_date, nationality",
+        ),
     ]);
 
   if (membershipsError) {
     throw membershipsError;
   }
 
-  if (grantsError) {
-    throw grantsError;
-  }
-
   if (associateProfilesError) {
     throw associateProfilesError;
   }
 
+  if (associateDependentsError) {
+    throw associateDependentsError;
+  }
+
+  const dependentsByAssociateProfileId = new Map<string, AssociateDependentRecord[]>();
+
+  for (const dependent of associateDependentsData ?? []) {
+    const entry = dependentsByAssociateProfileId.get(dependent.associate_profile_id) ?? [];
+    entry.push({
+      birthDate: dependent.birth_date ?? "",
+      category: dependent.category as AssociateCategory | null,
+      cpf: dependent.cpf,
+      fullName: dependent.full_name,
+      id: dependent.id,
+      nationality: dependent.nationality as Nationality | null,
+      rg: dependent.rg,
+    });
+    dependentsByAssociateProfileId.set(dependent.associate_profile_id, entry);
+  }
+
   const associateProfilesByProfileId = new Map(
-    (associateProfilesData ?? []).map((profile) => [profile.profile_id, profile]),
+    (associateProfilesData ?? []).map((profile) => [
+      profile.profile_id,
+      {
+        addressCity: profile.city ?? "",
+        addressComplement: profile.complement ?? "",
+        addressNeighborhood: profile.neighborhood ?? "",
+        addressNumber: profile.number ?? "",
+        addressState: profile.state ?? "",
+        addressStreet: profile.street ?? "",
+        birthDate: profile.birth_date ?? "",
+        category: profile.category as AssociateCategory | null,
+        cep: profile.cep ?? "",
+        cpf: profile.cpf ?? "",
+        dependents: dependentsByAssociateProfileId.get(profile.id) ?? [],
+        fullName: profile.full_name ?? "",
+        nationality: profile.nationality as Nationality | null,
+        observation: profile.observation ?? "",
+        phone: profile.phone ?? "",
+        photoUrl: profile.photo_url,
+        rg: profile.rg ?? "",
+        termAccepted: profile.term_accepted ?? false,
+      } satisfies AdminAssociateProfileSnapshot,
+    ]),
   );
 
   const memberships: AdminAssociateMembershipRecord[] = (membershipsData ?? [])
@@ -103,31 +151,15 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
           fullName: profile.full_name,
           id: profile.id,
         },
-        profileSnapshot: associateProfile
-          ? {
-              category: associateProfile.category,
-              phone: associateProfile.phone,
-            }
-          : null,
+        profileSnapshot: associateProfile ?? null,
         status: membership.status,
       } as AdminAssociateMembershipRecord;
     })
     .filter((membership): membership is AdminAssociateMembershipRecord => membership !== null);
 
-  const bootstrapGrants: AssociateBootstrapGrantRecord[] = (grantsData ?? []).map(
-    (grant) => ({
-      claimedAt: grant.claimed_at,
-      email: grant.email,
-      id: grant.id,
-      membershipStatus: grant.membership_status,
-      notes: grant.notes,
-      status: grant.status,
-    }),
-  );
-
   return {
     access,
-    bootstrapGrants,
+    bootstrapGrants: [],
     memberships,
   };
 }
