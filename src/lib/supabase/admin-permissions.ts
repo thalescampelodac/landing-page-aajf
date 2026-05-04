@@ -22,18 +22,11 @@ export type AdminBootstrapGrantRecord = {
   status: "pending" | "claimed" | "revoked";
 };
 
-export type EligibleAdminProfileRecord = {
-  email: string;
-  fullName: string | null;
-  id: string;
-};
-
 export type AdminPermissionsData =
   | { access: Extract<AdminAccess, { status: "unconfigured" | "unauthenticated" | "denied" }> }
   | {
       access: Extract<AdminAccess, { status: "authorized" }>;
       bootstrapGrants: AdminBootstrapGrantRecord[];
-      eligibleProfiles: EligibleAdminProfileRecord[];
       memberships: AdminMembershipRecord[];
     };
 
@@ -46,7 +39,7 @@ export async function getAdminPermissionsData(): Promise<AdminPermissionsData> {
 
   const supabase = await createClient();
 
-  const [{ data: membershipsData, error: membershipsError }, { data: grantsData, error: grantsError }, { data: profilesData, error: profilesError }] =
+  const [{ data: membershipsData, error: membershipsError }, { data: grantsData, error: grantsError }] =
     await Promise.all([
       supabase
         .schema("aajf")
@@ -58,11 +51,6 @@ export async function getAdminPermissionsData(): Promise<AdminPermissionsData> {
         .from("admin_bootstrap_grants")
         .select("id, email, role, status, claimed_at, notes")
         .order("created_at", { ascending: false }),
-      supabase
-        .schema("aajf")
-        .from("profiles")
-        .select("id, email, full_name")
-        .order("created_at", { ascending: false }),
     ]);
 
   if (membershipsError) {
@@ -71,10 +59,6 @@ export async function getAdminPermissionsData(): Promise<AdminPermissionsData> {
 
   if (grantsError) {
     throw grantsError;
-  }
-
-  if (profilesError) {
-    throw profilesError;
   }
 
   const memberships: AdminMembershipRecord[] = (membershipsData ?? [])
@@ -112,20 +96,9 @@ export async function getAdminPermissionsData(): Promise<AdminPermissionsData> {
     }),
   );
 
-  const memberProfileIds = new Set(memberships.map((membership) => membership.profile.id));
-
-  const eligibleProfiles: EligibleAdminProfileRecord[] = (profilesData ?? [])
-    .filter((profile) => !memberProfileIds.has(profile.id))
-    .map((profile) => ({
-      email: profile.email,
-      fullName: profile.full_name,
-      id: profile.id,
-    }));
-
   return {
     access,
     bootstrapGrants,
-    eligibleProfiles,
     memberships,
   };
 }

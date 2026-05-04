@@ -20,9 +20,3 @@ export const adminNavItems = [
     description: "Organização futura de avisos, publicações e recados internos.",
   },
 ];
-
-export const adminHighlights = [
-  "Gestão centralizada do acesso",
-  "Estrutura pronta para crescer por módulos",
-  "Responsiva para uso administrativo inicial",
-];

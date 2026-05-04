@@ -7,9 +7,14 @@ export const associatePhotoAcceptedMimeTypes = [
 export const associatePhotoMaxFileSizeInBytes = 5 * 1024 * 1024;
 
 export const associateCategoryOptions = [
+  "Kindergarten",
   "Kleine Kinder",
-  "Gosse Kinder",
+  "Grosse Kinder",
+  "Jugendliche",
+  "Erwachsene",
   "Heimweh",
+  "Senioren",
+  "Männertanz",
 ] as const;
 
 export const nationalityOptions = [

@@ -456,8 +456,6 @@ export function AssociateAreaManager({
 
                       <p className="mt-4 text-sm leading-7 text-[var(--color-muted)]">
                         Envie uma foto nítida, em JPG, PNG ou WEBP, com até 5 MB.
-                        O preview ajuda na conferência visual e, ao salvar a ficha,
-                        a imagem passa a ficar persistida no cadastro do associado.
                       </p>
                     </div>
                   </div>
@@ -561,23 +559,6 @@ export function AssociateAreaManager({
                 </div>
 
                 <div className="mt-6 grid gap-4">
-                  <button
-                    className="group flex min-h-36 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-[rgba(23,54,45,0.18)] bg-[rgba(255,250,243,0.72)] p-6 text-center transition hover:border-[rgba(23,54,45,0.3)] hover:bg-[rgba(255,250,243,0.92)]"
-                    onClick={addDependent}
-                    type="button"
-                  >
-                    <span className="flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(23,54,45,0.14)] bg-white text-3xl font-light text-[var(--color-green-deep)] transition group-hover:scale-105">
-                      +
-                    </span>
-                    <span className="mt-4 text-base font-semibold text-[var(--color-green-deep)]">
-                      Adicionar dependente
-                    </span>
-                    <span className="mt-2 max-w-md text-sm leading-7 text-[var(--color-muted)]">
-                      Use esta área sempre que precisar incluir o primeiro dependente
-                      ou acrescentar novos vínculos na ficha do associado.
-                    </span>
-                  </button>
-
                   {draft.dependents.length ? (
                     draft.dependents.map((dependent, index) => (
                       <div
@@ -673,6 +654,23 @@ export function AssociateAreaManager({
                       use a caixa com o símbolo de + para iniciar essa lista.
                     </div>
                   )}
+
+                  <button
+                    className="group flex min-h-36 w-full flex-col items-center justify-center rounded-[1.5rem] border border-dashed border-[rgba(23,54,45,0.18)] bg-[rgba(255,250,243,0.72)] p-6 text-center transition hover:border-[rgba(23,54,45,0.3)] hover:bg-[rgba(255,250,243,0.92)]"
+                    onClick={addDependent}
+                    type="button"
+                  >
+                    <span className="flex h-14 w-14 items-center justify-center rounded-full border border-[rgba(23,54,45,0.14)] bg-white text-3xl font-light text-[var(--color-green-deep)] transition group-hover:scale-105">
+                      +
+                    </span>
+                    <span className="mt-4 text-base font-semibold text-[var(--color-green-deep)]">
+                      Adicionar dependente
+                    </span>
+                    <span className="mt-2 max-w-md text-sm leading-7 text-[var(--color-muted)]">
+                      Use esta área sempre que precisar incluir o primeiro dependente
+                      ou acrescentar novos vínculos na ficha do associado.
+                    </span>
+                  </button>
                 </div>
               </div>
 

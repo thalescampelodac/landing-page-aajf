@@ -1,37 +1,14 @@
 import Link from "next/link";
-import { adminHighlights, adminNavItems } from "@/lib/admin-content";
+import { adminNavItems } from "@/lib/admin-content";
 
 export function AdminShell({ children }: { children: React.ReactNode }) {
   return (
     <main className="section-shell flex-1 pb-16 pt-8">
       <section className="hero-panel rounded-[2rem] p-8 sm:p-10 lg:p-12">
-        <div className="grid gap-8 lg:grid-cols-[minmax(0,1.55fr)_minmax(18rem,0.9fr)] lg:items-start">
-          <div>
-            <p className="section-eyebrow">Área Administrativa</p>
-            <h1 className="section-title mt-4 max-w-3xl">
-              Um painel inicial para organizar gestão, permissões e operação
-              interna.
-            </h1>
-            <p className="section-description mt-6 max-w-2xl">
-              Esta área administrativa agora tem estrutura própria, navegação
-              interna e espaço reservado para os módulos que vão sustentar a
-              operação da associação.
-            </p>
-          </div>
-
-          <div className="grid gap-3">
-            {adminHighlights.map((item) => (
-              <div key={item} className="metric-card">
-                <p className="metric-label">Direção</p>
-                <p className="metric-value">{item}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-
+        <p className="section-eyebrow">Área Administrativa</p>
         <nav
           aria-label="Navegação administrativa"
-          className="mt-8 grid gap-3 md:grid-cols-2 xl:grid-cols-4"
+          className="mt-6 grid gap-3 md:grid-cols-2 xl:grid-cols-4"
         >
           {adminNavItems.map((item) => (
             <Link

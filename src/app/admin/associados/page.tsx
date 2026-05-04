@@ -25,12 +25,11 @@ export default async function AdminAssociadosPage() {
   return (
     <AdminAccessPanel
       access={access}
-      authorizedDescription="Este módulo agora concede vínculo de associado, permite revisar status e cria a ponte operacional com a área do associado e a ficha cadastral persistida."
+      authorizedDescription=""
       authorizedTitle="Gestão de associados e ficha cadastral"
     >
       {authorizedData ? (
         <AdminAssociatesManager
-          bootstrapGrants={authorizedData.bootstrapGrants}
           memberships={authorizedData.memberships}
         />
       ) : null}
