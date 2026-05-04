@@ -1,45 +1,91 @@
-export default function AssociadoPage() {
+import Link from "next/link";
+import { redirect } from "next/navigation";
+import { AssociateAreaManager } from "@/components/associate-area-manager";
+import {
+  getAssociateAreaData,
+  type AssociateAreaData,
+} from "@/lib/supabase/associate-profile";
+
+export default async function AssociadoPage() {
+  const data = await getAssociateAreaData();
+  const { access } = data;
+
+  if (access.status === "unauthenticated") {
+    redirect("/entrar?next=/associado");
+  }
+
+  const authorizedData = isAuthorizedAssociateAreaData(data) ? data : null;
+
   return (
     <main className="section-shell flex-1 pb-16 pt-8">
-      <section className="soft-card rounded-[2rem] p-8 sm:p-10 lg:p-12">
-        <p className="section-eyebrow">Área do Associado</p>
-        <h1 className="section-title mt-4 max-w-3xl">
-          Um espaço futuro para acompanhar a vida da associação.
-        </h1>
-        <p className="section-description mt-6 max-w-2xl">
-          Esta rota foi preparada para reunir autenticação, dados cadastrais,
-          comunicados e recursos exclusivos para associados.
-        </p>
-        <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
-          Área em construção. Em breve, este espaço estará disponível.
-        </p>
-
-        <div className="mt-10 grid gap-5 lg:grid-cols-2">
-          <article className="rounded-[1.6rem] border border-[rgba(26,61,46,0.12)] bg-white/70 p-6">
-            <p className="section-eyebrow">Dados do Associado</p>
-            <h2 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-              Cadastro e informações da conta
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-              Aqui vamos definir os campos do perfil do associado, histórico de
-              vínculo, formas de contato e demais dados que a associação decidir
-              manter neste ambiente.
-            </p>
-          </article>
-
-          <article className="rounded-[1.6rem] border border-[rgba(26,61,46,0.12)] bg-white/70 p-6">
-            <p className="section-eyebrow">Segurança da Conta</p>
-            <h2 className="mt-3 text-2xl font-heading text-[var(--color-green-deep)]">
-              Alteração de senha
-            </h2>
-            <p className="mt-4 text-sm leading-7 text-[var(--color-green-deep)]">
-              A alteração de senha ficará junto dos dados do associado. Esse
-              espaço também deve concentrar orientações de acesso, recuperação e
-              reforço de segurança da conta.
-            </p>
-          </article>
-        </div>
-      </section>
+      {authorizedData ? (
+        <AssociateAreaManager
+          accessEmail={authorizedData.access.email}
+          authMethods={authorizedData.authMethods}
+          profile={authorizedData.profile}
+        />
+      ) : (
+        <AssociateAccessFallback access={access} />
+      )}
     </main>
   );
+}
+
+function AssociateAccessFallback({
+  access,
+}: {
+  access: Exclude<AssociateAreaData["access"], { status: "authorized" }>;
+}) {
+  return (
+    <section className="soft-card rounded-[2rem] p-8 sm:p-10 lg:p-12">
+      <p className="section-eyebrow">Área do Associado</p>
+      <h1 className="section-title mt-4 max-w-3xl">
+        Seu acesso de associado ainda não está liberado.
+      </h1>
+      <p className="section-description mt-6 max-w-2xl">
+        O login confirma sua identidade, mas a entrada nesta área depende de um
+        vínculo ativo de associado concedido pela associação.
+      </p>
+
+      {access.status === "unconfigured" ? (
+        <p className="mt-5 text-base font-medium text-[var(--color-red-deep)]">
+          Supabase ainda não está configurado neste ambiente.
+        </p>
+      ) : null}
+
+      {access.status === "denied" && access.membershipStatus ? (
+        <p className="mt-5 text-base font-medium text-[var(--color-red-deep)]">
+          Sua conta existe, mas o vínculo de associado está atualmente como{" "}
+          {access.membershipStatus}.
+        </p>
+      ) : null}
+
+      {access.status === "denied" && !access.membershipStatus ? (
+        <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
+          Ainda não encontramos um vínculo de associado para esta conta.
+        </p>
+      ) : null}
+
+      {access.status === "denied" && access.email ? (
+        <p className="mt-5 text-base font-medium text-[var(--color-green-deep)]">
+          Conta conectada: {access.email}
+        </p>
+      ) : null}
+
+      <div className="mt-8 flex flex-col gap-3 sm:flex-row">
+        <Link className="primary-button" href="/">
+          Voltar para a pagina inicial
+        </Link>
+        <Link className="secondary-button" href="/entrar?next=/associado">
+          Entrar com outra conta
+        </Link>
+      </div>
+    </section>
+  );
+}
+
+function isAuthorizedAssociateAreaData(
+  data: AssociateAreaData,
+): data is Extract<AssociateAreaData, { access: { status: "authorized" } }> {
+  return data.access.status === "authorized";
 }

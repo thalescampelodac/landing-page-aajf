@@ -147,9 +147,9 @@ a {
 
 .nav-chip:hover,
 .badge-chip:hover,
-.primary-button:hover,
-.secondary-button:hover,
-.ghost-button:hover {
+.primary-button:hover:not(:disabled),
+.secondary-button:hover:not(:disabled),
+.ghost-button:hover:not(:disabled) {
   transform: translateY(-2px);
 }
 
@@ -173,7 +173,10 @@ a {
     transform 180ms ease,
     box-shadow 180ms ease,
     background-color 180ms ease,
-    border-color 180ms ease;
+    border-color 180ms ease,
+    color 180ms ease,
+    opacity 180ms ease,
+    filter 180ms ease;
 }
 
 .primary-button {
@@ -192,6 +195,36 @@ a {
   border: 1px solid rgba(255, 247, 236, 0.2);
   background: rgba(255, 255, 255, 0.08);
   color: var(--color-paper);
+}
+
+.primary-button:disabled,
+.secondary-button:disabled,
+.ghost-button:disabled {
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: saturate(0.72);
+}
+
+.primary-button:disabled {
+  background: linear-gradient(
+    135deg,
+    rgba(23, 54, 45, 0.42),
+    rgba(44, 83, 71, 0.42)
+  );
+  color: rgba(255, 247, 236, 0.7);
+}
+
+.secondary-button:disabled {
+  border-color: rgba(23, 54, 45, 0.08);
+  background: rgba(255, 250, 243, 0.56);
+  color: rgba(24, 47, 38, 0.46);
+}
+
+.ghost-button:disabled {
+  border-color: rgba(255, 247, 236, 0.12);
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 247, 236, 0.56);
 }
 
 .metric-card {

@@ -28,7 +28,6 @@ Associados devem ter status operacional independente da autenticação:
 | --- | --- |
 | `active` | Associado com acesso válido. |
 | `inactive` | Associado sem acesso ativo no momento. |
-| `suspended` | Associado temporariamente bloqueado por decisão administrativa. |
 
 Administradores também devem ter status:
 
@@ -36,7 +35,6 @@ Administradores também devem ter status:
 | --- | --- |
 | `active` | Pode acessar a administração. |
 | `inactive` | Não pode acessar a administração. |
-| `suspended` | Bloqueio administrativo explícito. |
 
 ## Modelo de dados inicial
 
@@ -101,13 +99,13 @@ Campos sugeridos:
 
 ## Regras de autorização
 
-1. Usuário autenticado sem vínculo em `admin_memberships`, `associate_memberships` ou `supporter_profiles` não deve acessar áreas internas.
+1. Usuário autenticado sem vínculo em `admin_memberships`, `associate_memberships` ou `supporter_profiles` não deve acessar áreas internas. (thales> nao tem vinculo, nao acessa. recebe mensagem de que nao em autorização de acesso.)
 2. A área administrativa exige `admin_memberships.status = active`.
 3. A área do associado exige `associate_memberships.status = active`.
 4. A área do apoiador exige cadastro em `supporter_profiles` com status válido.
 5. Administradores podem conceder ou alterar acesso de associados.
 6. Administradores podem conceder acesso administrativo conforme regra definida no bootstrap.
-7. Status `inactive` e `suspended` bloqueiam acesso à área correspondente.
+7. Status `inactive` bloqueia acesso à área correspondente.
 
 ## Bootstrap de administradores
 
