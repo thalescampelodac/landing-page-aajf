@@ -56,13 +56,6 @@ describe("AdminPermissoesPage", () => {
           status: "pending",
         },
       ],
-      eligibleProfiles: [
-        {
-          email: "perfil@example.com",
-          fullName: "Pessoa de Teste",
-          id: "profile-1",
-        },
-      ],
       memberships: [
         {
           grantedAt: "2026-04-30T12:00:00.000Z",
@@ -97,7 +90,7 @@ describe("AdminPermissoesPage", () => {
     ).toBeInTheDocument();
     expect(screen.getByText(/novo-admin@example.com/i)).toBeInTheDocument();
     expect(
-      screen.getByRole("button", { name: /Conceder acesso/i }),
+      screen.getByRole("button", { name: /Autorizar e gerar link/i }),
     ).toBeInTheDocument();
   });
 });

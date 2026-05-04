@@ -10,9 +10,7 @@ describe("AdminShell", () => {
     );
 
     expect(
-      screen.getByRole("heading", {
-        name: /Um painel inicial para organizar gestão, permissões e operação interna/i,
-      }),
+      screen.getByText(/Área Administrativa/i),
     ).toBeInTheDocument();
     expect(
       screen.getByRole("navigation", { name: /Navegação administrativa/i }),
