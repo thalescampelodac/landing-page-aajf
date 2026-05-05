@@ -3,12 +3,13 @@ import Link from "next/link";
 import {
   communityMetrics,
   heroHighlights,
-  posts,
   siteConfig,
 } from "@/lib/site-content";
+import type { PublicationRecord } from "@/lib/supabase/publications";
 
-export function Hero() {
-  const featuredPost = posts[0];
+export function Hero({ featuredPost }: { featuredPost: PublicationRecord }) {
+  const coverImageUrl = featuredPost.coverImageUrl?.trim() || null;
+  const coverImageAlt = featuredPost.coverImageAlt?.trim() || featuredPost.title;
 
   return (
     <section id="inicio" className="section-shell pt-6 sm:pt-8">
@@ -61,25 +62,28 @@ export function Hero() {
 
             <div className="relative overflow-hidden rounded-[2.1rem] border border-white/55 bg-[rgba(255,250,245,0.74)] p-4 shadow-[0_32px_80px_rgba(19,29,28,0.16)] backdrop-blur">
               <div className="relative aspect-[4/3] overflow-hidden rounded-[1.7rem]">
-                <Image
-                  src={featuredPost.image!}
-                  alt="Integrantes do Grupo Schmetterling em apresentacao cultural"
-                  fill
-                  className="object-cover"
-                  priority
-                  sizes="(max-width: 1024px) 100vw, 42vw"
-                />
+                {coverImageUrl ? (
+                  <Image
+                    src={coverImageUrl}
+                    alt={coverImageAlt}
+                    fill
+                    className="object-cover"
+                    priority
+                    sizes="(max-width: 1024px) 100vw, 42vw"
+                  />
+                ) : (
+                  <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_left,rgba(232,188,90,0.24),transparent_36%),linear-gradient(135deg,rgba(14,23,22,0.98),rgba(129,27,31,0.92),rgba(228,190,112,0.72))]" />
+                )}
                 <div className="absolute inset-0 bg-[linear-gradient(180deg,rgba(18,27,25,0.04),rgba(18,27,25,0.78))]" />
                 <div className="absolute inset-x-0 bottom-0 p-6 text-white sm:p-7">
                   <p className="text-xs font-semibold uppercase tracking-[0.32em] text-[var(--color-gold-strong)]">
-                    Tradição em movimento
+                    {featuredPost.featured ? "Publicação em destaque" : "Publicação"}
                   </p>
                   <h2 className="mt-3 font-heading text-3xl leading-tight">
-                    Grupo Schmetterling
+                    {featuredPost.title}
                   </h2>
                   <p className="mt-3 max-w-md text-sm leading-7 text-[rgba(255,247,238,0.9)]">
-                    Figurinos, alegria e coreografias que aproximam a cidade de uma
-                    herança cultural viva.
+                    {featuredPost.excerpt}
                   </p>
                 </div>
               </div>

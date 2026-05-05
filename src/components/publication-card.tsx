@@ -2,17 +2,21 @@ import Image from "next/image";
 import Link from "next/link";
 
 type PublicationCardProps = {
+  href?: string;
   title: string;
   excerpt: string;
   date: string;
+  imageAlt?: string | null;
   image?: string | null;
   featured?: boolean;
 };
 
 export function PublicationCard({
+  href = "/publicacoes",
   title,
   excerpt,
   date,
+  imageAlt,
   image,
   featured = false,
 }: PublicationCardProps) {
@@ -26,7 +30,7 @@ export function PublicationCard({
         <div className="relative aspect-[16/10]">
           <Image
             src={image}
-            alt={title}
+            alt={imageAlt || title}
             fill
             className="object-cover"
             sizes="(max-width: 1024px) 100vw, 60vw"
@@ -48,8 +52,8 @@ export function PublicationCard({
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-muted-strong)]">
             {date}
           </p>
-          <Link className="text-sm font-semibold text-[var(--color-green-deep)]" href="/publicacoes">
-            Ver publicações
+          <Link className="text-sm font-semibold text-[var(--color-green-deep)]" href={href}>
+            Ler publicação
           </Link>
         </div>
       </div>
