@@ -34,7 +34,10 @@ export function AdminAssociatesManager({
     const matchesQuery =
       !normalizedQuery ||
       membership.profile.email.toLowerCase().includes(normalizedQuery) ||
-      (membership.profile.fullName || "").toLowerCase().includes(normalizedQuery);
+      (membership.profile.fullName || "").toLowerCase().includes(normalizedQuery) ||
+      (membership.profileSnapshot?.membershipNumber || "")
+        .toLowerCase()
+        .includes(normalizedQuery);
 
     const matchesStatus =
       statusFilter === "all" || membership.status === statusFilter;
@@ -60,7 +63,7 @@ export function AdminAssociatesManager({
           <div className="mt-4 grid gap-4">
             <div className="grid gap-4 rounded-[1.4rem] border border-[rgba(23,54,45,0.1)] bg-[rgba(255,250,243,0.72)] p-4 lg:grid-cols-3">
               <label className="form-field">
-                <span>Buscar por nome ou email</span>
+                <span>Buscar por nome, email ou matrícula</span>
                 <input
                   onChange={(event) => {
                     setQuery(event.target.value);
@@ -242,8 +245,11 @@ function AssociateMembershipRow({
 
         <div className="grid gap-4 lg:grid-cols-[minmax(11rem,1.3fr)_minmax(12rem,1.25fr)_minmax(7rem,0.8fr)_minmax(8rem,0.9fr)_minmax(9rem,0.9fr)_minmax(8.5rem,0.95fr)] lg:items-start">
           <div className="min-w-0">
-            <p className="text-[1.05rem] font-semibold leading-7 text-[var(--color-green-deep)]">
+              <p className="text-[1.05rem] font-semibold leading-7 text-[var(--color-green-deep)]">
               {membership.profile.fullName || "Sem nome informado"}
+            </p>
+            <p className="mt-1 text-sm font-medium text-[var(--color-muted)]">
+              Matrícula: {membership.profileSnapshot?.membershipNumber || "Pendente"}
             </p>
             <p className="mt-2 text-[0.7rem] uppercase tracking-[0.16em] text-[var(--color-red)]">
               Concedido em {formatDateTime(membership.grantedAt)}
@@ -321,6 +327,7 @@ function AssociateMembershipRow({
               <div className="grid gap-6 text-sm leading-7 text-[var(--color-green-deep)]">
                 <div className="grid gap-2">
                   <p><strong>Email:</strong> {membership.profile.email}</p>
+                  <p><strong>Matrícula do associado:</strong> {membership.profileSnapshot?.membershipNumber || "Pendente"}</p>
                   <p><strong>Status do vínculo:</strong> {membership.status}</p>
                   <p><strong>Concedido em:</strong> {formatDateTime(membership.grantedAt)}</p>
                   <p><strong>Observações administrativas:</strong> {membership.notes || "Nenhuma observação registrada."}</p>
@@ -366,6 +373,7 @@ function AssociateMembershipRow({
                         >
                           <div className="space-y-2">
                             <p><strong>Dependente {index + 1}:</strong> {dependent.fullName}</p>
+                            <p><strong>Matrícula:</strong> {dependent.membershipNumber || "Pendente"}</p>
                             <p><strong>Categoria:</strong> {dependent.category || "Não definida"}</p>
                             <p><strong>CPF:</strong> {dependent.cpf || "Não informado"}</p>
                             <p><strong>RG:</strong> {dependent.rg || "Não informado"}</p>

@@ -5,22 +5,23 @@ import { Hero } from "@/components/hero";
 import { PublicationCard } from "@/components/publication-card";
 import { SectionTitle } from "@/components/section-title";
 import { TestimonialCard } from "@/components/testimonial-card";
+import type { PublicationRecord } from "@/lib/supabase/publications";
+import { formatPublicationDate } from "@/lib/supabase/publications";
 import {
   aboutContent,
   accessAreas,
   essenceItems,
-  posts,
   schmetterlingContent,
   siteConfig,
   testimonials,
 } from "@/lib/site-content";
 
-export function HomeContent() {
+export function HomeContent({ posts }: { posts: PublicationRecord[] }) {
   const [featuredPost, ...otherPosts] = posts;
 
   return (
     <main className="flex-1 pb-20">
-      <Hero />
+      <Hero featuredPost={featuredPost} />
 
       <section id="essencia" className="section-shell section-spacing">
         <SectionTitle
@@ -138,8 +139,10 @@ export function HomeContent() {
           <PublicationCard
             title={featuredPost.title}
             excerpt={featuredPost.excerpt}
-            date={featuredPost.date}
-            image={featuredPost.image}
+            date={formatPublicationDate(featuredPost.publishedAt)}
+            href={`/publicacoes/${featuredPost.slug}`}
+            image={featuredPost.coverImageUrl}
+            imageAlt={featuredPost.coverImageAlt}
             featured
           />
           {otherPosts.map((post) => (
@@ -147,8 +150,10 @@ export function HomeContent() {
               key={post.slug}
               title={post.title}
               excerpt={post.excerpt}
-              date={post.date}
-              image={post.image}
+              date={formatPublicationDate(post.publishedAt)}
+              href={`/publicacoes/${post.slug}`}
+              image={post.coverImageUrl}
+              imageAlt={post.coverImageAlt}
             />
           ))}
         </div>

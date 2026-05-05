@@ -29,6 +29,7 @@ vi.mock("@/lib/supabase/associate-profile", async () => {
         dependents: [],
         email: "associado@example.com",
         fullName: "Associado de Exemplo",
+        membershipNumber: "000001",
         nationality: "Brasileira",
         observation: "Observação de teste",
         phone: "(32) 99999-0000",

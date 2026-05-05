@@ -321,22 +321,40 @@ export async function saveAssociateProfile(
     return { error: baseProfileUpdateError.message };
   }
 
-  const { error: deleteDependentsError } = await supabase
+  const { data: existingDependents, error: existingDependentsError } = await supabase
     .schema("aajf")
     .from("associate_dependents")
-    .delete()
+    .select("id")
     .eq("associate_profile_id", profileRecord.id);
 
-  if (deleteDependentsError) {
-    return { error: deleteDependentsError.message };
+  if (existingDependentsError) {
+    return { error: existingDependentsError.message };
+  }
+
+  const submittedDependentIds = new Set(dependents.map((dependent) => dependent.id));
+  const dependentIdsToDelete = (existingDependents ?? [])
+    .map((dependent) => dependent.id)
+    .filter((dependentId) => !submittedDependentIds.has(dependentId));
+
+  if (dependentIdsToDelete.length) {
+    const { error: deleteDependentsError } = await supabase
+      .schema("aajf")
+      .from("associate_dependents")
+      .delete()
+      .in("id", dependentIdsToDelete);
+
+    if (deleteDependentsError) {
+      return { error: deleteDependentsError.message };
+    }
   }
 
   if (dependents.length) {
-    const { error: insertDependentsError } = await supabase
+    const { error: upsertDependentsError } = await supabase
       .schema("aajf")
       .from("associate_dependents")
-      .insert(
+      .upsert(
         dependents.map((dependent) => ({
+          id: dependent.id,
           associate_profile_id: profileRecord.id,
           birth_date: dependent.birthDate || null,
           category: dependent.category || null,
@@ -345,10 +363,11 @@ export async function saveAssociateProfile(
           nationality: dependent.nationality || null,
           rg: dependent.rg || null,
         })),
+        { onConflict: "id" },
       );
 
-    if (insertDependentsError) {
-      return { error: insertDependentsError.message };
+    if (upsertDependentsError) {
+      return { error: upsertDependentsError.message };
     }
   }
 

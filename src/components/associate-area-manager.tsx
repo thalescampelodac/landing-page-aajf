@@ -23,6 +23,7 @@ type DependentDraft = {
   cpf: string;
   fullName: string;
   id: string;
+  membershipNumber: string | null;
   nationality: Nationality | "";
   rg: string;
 };
@@ -41,6 +42,7 @@ type AssociateDraft = {
   dependents: DependentDraft[];
   email: string;
   fullName: string;
+  membershipNumber: string | null;
   nationality: Nationality | "";
   observation: string;
   phone: string;
@@ -136,6 +138,7 @@ export function AssociateAreaManager({
       category: draft.category || "Não informada",
       cpf: draft.cpf || "Não informado",
       fullName: draft.fullName || "Nome em atualização",
+      membershipNumber: draft.membershipNumber,
       nationality: draft.nationality || "Não informada",
       photoUrl: draft.photoUrl,
       profileId: profile.profileId,
@@ -178,6 +181,7 @@ export function AssociateAreaManager({
           cpf: "",
           fullName: "",
           id: createClientId(),
+          membershipNumber: null,
           nationality: "",
           rg: "",
         },
@@ -334,6 +338,7 @@ export function AssociateAreaManager({
       cpf: dependent.cpf || null,
       fullName: dependent.fullName,
       id: dependent.id,
+      membershipNumber: dependent.membershipNumber,
       nationality: dependent.nationality || null,
       rg: dependent.rg || null,
     })),
@@ -371,6 +376,10 @@ export function AssociateAreaManager({
                       value={draft.fullName}
                     />
                     <ReadOnlyField label="Email" value={draft.email} />
+                    <ReadOnlyField
+                      label="Matrícula"
+                      value={draft.membershipNumber || "Será atribuída automaticamente"}
+                    />
                     <SelectField
                       label="Categoria"
                       name="category"
@@ -568,6 +577,9 @@ export function AssociateAreaManager({
                         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
                           <p className="text-base font-semibold text-[var(--color-green-deep)]">
                             Dependente {index + 1}
+                          </p>
+                          <p className="text-sm font-medium text-[var(--color-muted)]">
+                            Matrícula: {dependent.membershipNumber || "Será atribuída automaticamente"}
                           </p>
                           <button
                             className="rounded-full border border-[rgba(154,31,43,0.2)] bg-[rgba(154,31,43,0.08)] px-5 py-2 text-sm font-semibold text-[var(--color-red-deep)] transition hover:bg-[rgba(154,31,43,0.14)]"
@@ -892,6 +904,7 @@ export function AssociateAreaManager({
                     category: draft.category || "Não informada",
                     cpf: draft.cpf || "Não informado",
                     fullName: draft.fullName || "Nome em atualização",
+                    membershipNumber: draft.membershipNumber,
                     nationality: draft.nationality || "Não informada",
                     photoUrl: draft.photoUrl,
                     profileId: profile.profileId,
@@ -914,6 +927,7 @@ async function downloadAssociateCardPng({
   category,
   cpf,
   fullName,
+  membershipNumber,
   nationality,
   photoUrl,
   profileId,
@@ -922,6 +936,7 @@ async function downloadAssociateCardPng({
   category: string;
   cpf: string;
   fullName: string;
+  membershipNumber: string | null;
   nationality: string;
   photoUrl: string | null;
   profileId: string;
@@ -931,6 +946,7 @@ async function downloadAssociateCardPng({
     category,
     cpf,
     fullName,
+    membershipNumber,
     nationality,
     photoUrl,
     profileId,
@@ -951,6 +967,7 @@ async function createAssociateCardPngDataUrl({
   category,
   cpf,
   fullName,
+  membershipNumber,
   nationality,
   photoUrl,
   profileId,
@@ -959,6 +976,7 @@ async function createAssociateCardPngDataUrl({
   category: string;
   cpf: string;
   fullName: string;
+  membershipNumber: string | null;
   nationality: string;
   photoUrl: string | null;
   profileId: string;
@@ -1041,7 +1059,7 @@ async function createAssociateCardPngDataUrl({
   context.fillText("ASSOCIADO", 316, 114);
 
   context.textAlign = "right";
-  context.fillText(formatAssociateCardId(profileId), 704, 72);
+  context.fillText(formatAssociateCardId(profileId, membershipNumber), 704, 72);
   context.textAlign = "left";
 
   context.fillStyle = "#173b2f";
@@ -1350,7 +1368,14 @@ function ReadOnlyField({ label, value }: { label: string; value: string }) {
   return (
     <label className="form-field">
       <span>{label}</span>
-      <input readOnly value={value} />
+      <input
+        aria-readonly="true"
+        className="cursor-default bg-[rgba(247,242,232,0.96)] text-[var(--color-green-deep)]"
+        disabled
+        readOnly
+        tabIndex={-1}
+        value={value}
+      />
     </label>
   );
 }
@@ -1438,11 +1463,13 @@ function createDraft(profile: AssociateProfileRecord): AssociateDraft {
       cpf: dependent.cpf ?? "",
       fullName: dependent.fullName,
       id: dependent.id,
+      membershipNumber: dependent.membershipNumber ?? null,
       nationality: dependent.nationality ?? "",
       rg: dependent.rg ?? "",
     })),
     email: profile.email,
     fullName: profile.fullName,
+    membershipNumber: profile.membershipNumber ?? null,
     nationality: profile.nationality ?? "",
     observation: profile.observation,
     phone: profile.phone,
@@ -1474,7 +1501,11 @@ function formatDate(value: string) {
   return `${day}/${month}/${year}`;
 }
 
-function formatAssociateCardId(profileId: string) {
+function formatAssociateCardId(profileId: string, membershipNumber: string | null) {
+  if (membershipNumber) {
+    return `AAJF-${membershipNumber}`;
+  }
+
   const suffix = profileId.replace(/-/g, "").slice(-6).toUpperCase();
   return `AAJF-${suffix || "TEMP"}`;
 }

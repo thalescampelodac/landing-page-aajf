@@ -1,8 +1,13 @@
 import Image from "next/image";
 import { SectionTitle } from "@/components/section-title";
-import { posts } from "@/lib/site-content";
+import {
+  formatPublicationDate,
+  getPublishedPublications,
+} from "@/lib/supabase/publications";
 
-export default function PublicacoesPage() {
+export default async function PublicacoesPage() {
+  const posts = await getPublishedPublications();
+
   return (
     <main className="section-shell mt-8 flex-1 pb-16">
       <section className="soft-card rounded-[2rem] p-8 sm:p-10">
@@ -20,10 +25,10 @@ export default function PublicacoesPage() {
             className="soft-card overflow-hidden rounded-[2rem] lg:grid lg:grid-cols-[0.95fr_1.05fr]"
           >
             <div className="relative min-h-[260px] bg-[linear-gradient(135deg,#20452e_0%,#8b1e28_45%,#d6b06a_100%)]">
-              {post.image ? (
+              {post.coverImageUrl ? (
                 <Image
-                  src={post.image}
-                  alt={post.title}
+                  src={post.coverImageUrl}
+                  alt={post.coverImageAlt || post.title}
                   fill
                   className="object-cover"
                   priority={index === 0}
@@ -39,7 +44,7 @@ export default function PublicacoesPage() {
                 {post.title}
               </h2>
               <p className="mt-5 text-xs font-semibold uppercase tracking-[0.24em] text-[var(--color-muted-strong)]">
-                {post.date}
+                {formatPublicationDate(post.publishedAt)}
               </p>
               <div className="mt-6 grid gap-4 text-base leading-8 text-[var(--color-muted)]">
                 {post.body.map((paragraph) => (

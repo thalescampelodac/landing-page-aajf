@@ -67,13 +67,13 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
         .schema("aajf")
         .from("associate_profiles")
         .select(
-          "id, profile_id, full_name, category, cpf, rg, phone, birth_date, nationality, cep, street, number, complement, neighborhood, city, state, observation, term_accepted, photo_url",
+          "id, profile_id, membership_number, full_name, category, cpf, rg, phone, birth_date, nationality, cep, street, number, complement, neighborhood, city, state, observation, term_accepted, photo_url",
         ),
       supabase
         .schema("aajf")
         .from("associate_dependents")
         .select(
-          "id, associate_profile_id, full_name, category, cpf, rg, birth_date, nationality",
+          "id, associate_profile_id, membership_number, full_name, category, cpf, rg, birth_date, nationality",
         ),
     ]);
 
@@ -99,6 +99,7 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
       cpf: dependent.cpf,
       fullName: dependent.full_name,
       id: dependent.id,
+      membershipNumber: dependent.membership_number ?? null,
       nationality: dependent.nationality as Nationality | null,
       rg: dependent.rg,
     });
@@ -121,6 +122,7 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
         cpf: profile.cpf ?? "",
         dependents: dependentsByAssociateProfileId.get(profile.id) ?? [],
         fullName: profile.full_name ?? "",
+        membershipNumber: profile.membership_number ?? null,
         nationality: profile.nationality as Nationality | null,
         observation: profile.observation ?? "",
         phone: profile.phone ?? "",
