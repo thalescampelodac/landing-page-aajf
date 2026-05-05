@@ -64,7 +64,7 @@ export async function getAssociateAreaData(): Promise<AssociateAreaData> {
         .schema("aajf")
         .from("associate_profiles")
         .select(
-          "id, photo_url, full_name, category, cpf, rg, phone, birth_date, nationality, cep, street, number, complement, neighborhood, city, state, observation, term_accepted, associate_dependents(id, full_name, category, cpf, rg, birth_date, nationality)",
+          "id, membership_number, photo_url, full_name, category, cpf, rg, phone, birth_date, nationality, cep, street, number, complement, neighborhood, city, state, observation, term_accepted, associate_dependents(id, membership_number, full_name, category, cpf, rg, birth_date, nationality)",
         )
         .eq("profile_id", user.id)
         .maybeSingle(),
@@ -86,6 +86,7 @@ export async function getAssociateAreaData(): Promise<AssociateAreaData> {
     cpf: dependent.cpf,
     fullName: dependent.full_name,
     id: dependent.id,
+    membershipNumber: dependent.membership_number ?? null,
     nationality: dependent.nationality,
     rg: dependent.rg,
   }));
@@ -113,6 +114,7 @@ export async function getAssociateAreaData(): Promise<AssociateAreaData> {
       dependents,
       email: profileData?.email ?? user.email ?? "",
       fullName: associateProfileData?.full_name ?? profileData?.full_name ?? "",
+      membershipNumber: associateProfileData?.membership_number ?? null,
       nationality: associateProfileData?.nationality ?? null,
       observation: associateProfileData?.observation ?? "",
       phone: associateProfileData?.phone ?? "",

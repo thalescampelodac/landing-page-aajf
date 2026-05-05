@@ -34,6 +34,7 @@ export type AssociateDependentRecord = {
   cpf: string | null;
   fullName: string;
   id: string;
+  membershipNumber: string | null;
   nationality: Nationality | null;
   rg: string | null;
 };
@@ -52,6 +53,7 @@ export type AssociateProfileRecord = {
   dependents: AssociateDependentRecord[];
   email: string;
   fullName: string;
+  membershipNumber: string | null;
   nationality: Nationality | null;
   observation: string;
   phone: string;
