@@ -25,6 +25,33 @@ export type AdminAssociateMembershipRecord = {
   status: "active" | "inactive" | "suspended";
 };
 
+export type AdminAssociateExportRow = {
+  addressCity: string;
+  addressComplement: string;
+  addressNeighborhood: string;
+  addressNumber: string;
+  addressState: string;
+  addressStreet: string;
+  associateResponsibleMembershipNumber: string;
+  associateResponsibleName: string;
+  birthDate: string;
+  category: string;
+  cpf: string;
+  email: string;
+  grantedAt: string;
+  hasPhoto: "Sim" | "Nao";
+  membershipNumber: string;
+  name: string;
+  nationality: string;
+  observation: string;
+  phone: string;
+  rg: string;
+  status: "active" | "inactive" | "suspended";
+  termAccepted: "Sim" | "Nao" | "";
+  type: "associado" | "dependente";
+  zipCode: string;
+};
+
 export type AssociateBootstrapGrantRecord = {
   claimedAt: string | null;
   email: string;
@@ -164,4 +191,90 @@ export async function getAdminAssociatesData(): Promise<AdminAssociatesData> {
     bootstrapGrants: [],
     memberships,
   };
+}
+
+export async function getAdminAssociateExportRows(): Promise<
+  | { access: Extract<AdminAccess, { status: "authorized" }>; rows: AdminAssociateExportRow[] }
+  | { access: Extract<AdminAccess, { status: "unconfigured" | "unauthenticated" | "denied" }> }
+> {
+  const result = await getAdminAssociatesData();
+
+  if (!isAuthorizedAdminAssociatesData(result)) {
+    return { access: result.access };
+  }
+
+  const rows = result.memberships.flatMap((membership) => {
+    const snapshot = membership.profileSnapshot;
+    const associateMembershipNumber = snapshot?.membershipNumber || "Pendente";
+    const associateName =
+      snapshot?.fullName || membership.profile.fullName || "Sem nome informado";
+
+    const associateRow: AdminAssociateExportRow = {
+      addressCity: snapshot?.addressCity || "",
+      addressComplement: snapshot?.addressComplement || "",
+      addressNeighborhood: snapshot?.addressNeighborhood || "",
+      addressNumber: snapshot?.addressNumber || "",
+      addressState: snapshot?.addressState || "",
+      addressStreet: snapshot?.addressStreet || "",
+      associateResponsibleMembershipNumber: associateMembershipNumber,
+      associateResponsibleName: associateName,
+      birthDate: snapshot?.birthDate || "",
+      category: snapshot?.category || "",
+      cpf: snapshot?.cpf || "",
+      email: membership.profile.email,
+      grantedAt: membership.grantedAt,
+      hasPhoto: snapshot?.photoUrl ? "Sim" : "Nao",
+      membershipNumber: associateMembershipNumber,
+      name: associateName,
+      nationality: snapshot?.nationality || "",
+      observation: snapshot?.observation || membership.notes || "",
+      phone: snapshot?.phone || "",
+      rg: snapshot?.rg || "",
+      status: membership.status,
+      termAccepted: snapshot?.termAccepted ? "Sim" : "Nao",
+      type: "associado",
+      zipCode: snapshot?.cep || "",
+    };
+
+    const dependentRows: AdminAssociateExportRow[] =
+      snapshot?.dependents.map((dependent) => ({
+        addressCity: "",
+        addressComplement: "",
+        addressNeighborhood: "",
+        addressNumber: "",
+        addressState: "",
+        addressStreet: "",
+        associateResponsibleMembershipNumber: associateMembershipNumber,
+        associateResponsibleName: associateName,
+        birthDate: dependent.birthDate || "",
+        category: dependent.category || "",
+        cpf: dependent.cpf || "",
+        email: "",
+        grantedAt: membership.grantedAt,
+        hasPhoto: "Nao",
+        membershipNumber: dependent.membershipNumber || "Pendente",
+        name: dependent.fullName,
+        nationality: dependent.nationality || "",
+        observation: "",
+        phone: "",
+        rg: dependent.rg || "",
+        status: membership.status,
+        termAccepted: "",
+        type: "dependente",
+        zipCode: "",
+      })) ?? [];
+
+    return [associateRow, ...dependentRows];
+  });
+
+  return {
+    access: result.access,
+    rows,
+  };
+}
+
+function isAuthorizedAdminAssociatesData(
+  data: AdminAssociatesData,
+): data is Extract<AdminAssociatesData, { access: { status: "authorized" } }> {
+  return data.access.status === "authorized";
 }
