@@ -59,7 +59,23 @@ export function AdminAssociatesManager({
     <div className="grid gap-6">
       <section className="grid gap-5 xl:grid-cols-[minmax(0,1.05fr)_minmax(20rem,0.95fr)]">
         <article className="rounded-[1.6rem] border border-[rgba(23,61,46,0.12)] bg-white/72 p-6">
-          <p className="section-eyebrow">Associados atuais</p>
+          <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+            <p className="section-eyebrow">Associados atuais</p>
+            <div className="flex flex-col gap-3 sm:flex-row">
+              <a
+                className="secondary-button"
+                href="/admin/associados/export/excel"
+              >
+                Exportar Excel
+              </a>
+              <a
+                className="secondary-button"
+                href="/admin/associados/export/pdf"
+              >
+                Exportar PDF
+              </a>
+            </div>
+          </div>
           <div className="mt-4 grid gap-4">
             <div className="grid gap-4 rounded-[1.4rem] border border-[rgba(23,54,45,0.1)] bg-[rgba(255,250,243,0.72)] p-4 lg:grid-cols-3">
               <label className="form-field">
